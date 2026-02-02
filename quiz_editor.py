@@ -619,6 +619,7 @@ if uploaded_file is not None:
             
             # 2. Mise à jour du session_state
             st.session_state.data = new_data
+            st.session_state.data['title'] = new_data['title']
             
             # 3. Mise à jour du nom de fichier pour les futures sauvegardes
             st.session_state["shared_fn"] = uploaded_file.name
@@ -1018,7 +1019,7 @@ with st.container():
 
     title = st.text_input(
         "Titre du document", 
-        value=f"📖 {data.get('title', 'Quiz sans titre')}",
+        value=f"📖 {st.session_state.data.get('title', 'Quiz sans titre')}",
         key="quiz_title",
         help="Le titre principal du fichier YAML (clé 'title') - Modifiable ici.",
         #label_visibility="collapsed",
