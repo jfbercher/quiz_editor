@@ -449,7 +449,7 @@ span[data-testid="stMainMenu"] {
 """, unsafe_allow_html=True)
 
 def prepare_data(indata, output_file, mode="crypt", pwd=""):    
-    from labquizdev.putils import crypt_data, encode_data
+    from labquiz.putils import crypt_data, encode_data
     from pathlib import Path
      
     import copy
@@ -1045,11 +1045,17 @@ with col_save1:
 
 with col_save2:
     st.markdown("<div style='padding-top: 28px;'></div>", unsafe_allow_html=True)
-    if st.button("💾 SAUVEGARDER", key="btn_main_save_final"):
-        fname = st.session_state.get("fn_main") or st.session_state["shared_fn"]
-        save_my_yaml(fname)
+    
+    btn_save, btn_download = st.columns([1, 1], gap="small")
 
+    with btn_save:
+        if st.button("💾 SAUVER", key="btn_main_save_final", use_container_width=True):
+            fname = st.session_state.get("fn_main") or st.session_state["shared_fn"]
+            save_my_yaml(fname)
 
+    with btn_download:
+        if st.button("⬇ DOWNLOAD", use_container_width=True):
+            export_config_dialog(data, "YAML")
 
 
 if st.session_state.current_quiz:
