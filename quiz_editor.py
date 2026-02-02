@@ -614,12 +614,12 @@ if uploaded_file is not None:
     if uploaded_file.name != st.session_state.last_uploaded_file:
         try:
             # 1. Lecture du contenu du fichier uploadé
-            # On utilise votre instance 'yaml' (ruamel) déjà configurée
-            new_data = yaml.load(uploaded_file)
+            # On utilise l'instance 'yaml' (ruamel) déjà configurée
+            data = yaml.load(uploaded_file)
             
             # 2. Mise à jour du session_state
-            st.session_state.data = new_data
-            st.session_state.data['title'] = new_data.get('title', 'Entrer un titre ici')
+            st.session_state.data = data
+            st.session_state.data['title'] = data.get('title', 'Entrer un titre ici')
             
             # 3. Mise à jour du nom de fichier pour les futures sauvegardes
             st.session_state["shared_fn"] = uploaded_file.name
