@@ -1026,6 +1026,7 @@ with st.container():
     )
 
 data["title"] = title.lstrip("📖 ").strip()
+st.session_state.data["title"] = title.lstrip("📖 ").strip()
 st.caption(f"Fichier en cours : `{st.session_state['shared_fn']}`")
 col_save1, col_save2 = st.columns([6, 4])
 
