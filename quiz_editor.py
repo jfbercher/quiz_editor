@@ -619,7 +619,7 @@ if uploaded_file is not None:
             
             # 2. Mise à jour du session_state
             st.session_state.data = new_data
-            st.session_state.data['title'] = new_data['title']
+            st.session_state.data['title'] = new_data.get('title', 'Entrer un titre ici')]
             
             # 3. Mise à jour du nom de fichier pour les futures sauvegardes
             st.session_state["shared_fn"] = uploaded_file.name
