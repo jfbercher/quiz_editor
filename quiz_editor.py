@@ -161,6 +161,7 @@ if 'data' not in st.session_state:
     st.session_state.data = load_data()
 
 data = st.session_state.data
+st.session_state["quiz_title"] = st.session_state.data.get("title", "Entrez un titre ici")
 
 
 
@@ -620,8 +621,10 @@ if uploaded_file is not None:
             # 2. Mise à jour du session_state
             st.session_state.data = data
             st.session_state.data['title'] = data.get('title', 'Entrer un titre ici')
-            
+            st.session_state["quiz_title"] = st.session_state.data["title"]
+
             # 3. Mise à jour du nom de fichier pour les futures sauvegardes
+            
             st.session_state["shared_fn"] = uploaded_file.name
             st.session_state.last_uploaded_file = uploaded_file.name
 
@@ -1019,7 +1022,7 @@ with st.container():
 
     title = st.text_input(
         "Titre du document", 
-        value=f"📖 {st.session_state.data.get('title', 'Quiz sans titre')}",
+        #value=f"📖 {st.session_state.data.get('title', 'Quiz sans titre')}",
         key="quiz_title",
         help="Le titre principal du fichier YAML (clé 'title') - Modifiable ici.",
         #label_visibility="collapsed",
