@@ -1,0 +1,6 @@
+.DS_Store
+numpy
+pandas
+ruamel.yaml
+streamlit
+git+https://github.com/jfbercher/labquiz.git#egg=labquiz
