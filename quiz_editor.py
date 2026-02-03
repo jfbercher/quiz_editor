@@ -104,6 +104,7 @@ def save_my_yaml(filename):
         yaml_format.dump(data_to_save, f)
     
     st.success(f"Fichier enregistré proprement sous `{filename}`")
+    return data_to_save
 
 # Pour exports
 if 'selected_for_export' not in st.session_state:
@@ -1043,19 +1044,23 @@ with col_save1:
     help="'Enregistrer sous'."
     )
 
-with col_save2:
     st.markdown("<div style='padding-top: 28px;'></div>", unsafe_allow_html=True)
-    
-    btn_save, btn_download = st.columns([1, 1], gap="small")
 
-    with btn_save:
-        if st.button("💾 SAUVER", key="btn_main_save_final", use_container_width=True):
-            fname = st.session_state.get("fn_main") or st.session_state["shared_fn"]
-            save_my_yaml(fname)
+    fname = st.session_state.get("fn_main") or st.session_state["shared_fn"]
 
-    with btn_download:
-        if st.button("⬇ DOWNLOAD", use_container_width=True):
-            export_config_dialog(data, "YAML")
+    def build_yaml():
+        data_to_save = save_my_yaml(fname)
+        stream = StringIO()
+        yaml.dump(data_to_save, stream)
+        return stream.getvalue()
+
+    st.download_button(
+        label="💾 Sauver et télécharger le YAML",
+        data=build_yaml,
+        file_name=fname,
+        mime="text/yaml",
+        width="stretch",
+    )
 
 
 if st.session_state.current_quiz:
