@@ -449,7 +449,6 @@ def export_config_dialog(export_data, format_type):
                 #on_click=st.rerun # Pour fermer ou rafraîchir après action
             )
 
-            _qo_crypt
             st.download_button(
                 label=f"⬇️ Télécharger {file_name}_qo_{mode}{extension} (questions only)",
                 data=st.session_state.output_qo_content,
