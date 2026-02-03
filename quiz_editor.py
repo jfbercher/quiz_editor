@@ -224,7 +224,8 @@ if "current_quiz" not in st.session_state:
 
 # -----------------------------------
 
-st.set_page_config(layout="wide", page_title=f"Éditeur YAML - {FILE_PATH}")
+st.set_page_config(layout="wide", page_title=f"Éditeur YAML - {FILE_PATH}",  
+                   page_icon="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1F4C3.png") #📃")
 
 hacks = '''# hack pour le file_uploader
 st.markdown("""
@@ -1078,7 +1079,7 @@ with col_save2:
         if st.session_state.output_content is not None:
             fname = st.session_state.get("fn_main") or st.session_state["shared_fn"]
             st.download_button(
-                label="⬇ Télécharger le YAML",
+                label=" Télécharger !",
                 data=st.session_state.output_content,
                 file_name=fname,
                 mime="text/yaml",
