@@ -1076,6 +1076,7 @@ with col_save2:
 
     with btn_download:
         if st.session_state.output_content is not None:
+            fname = st.session_state.get("fn_main") or st.session_state["shared_fn"]
             st.download_button(
                 label="⬇ Télécharger le YAML",
                 data=st.session_state.output_content,
