@@ -1053,6 +1053,7 @@ with col_save1:
     help="'Enregistrer sous'."
     )
 
+with col_save2:
     st.markdown("<div style='padding-top: 28px;'></div>", unsafe_allow_html=True)
 
     fname = st.session_state.get("fn_main") or st.session_state["shared_fn"]
