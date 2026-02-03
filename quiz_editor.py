@@ -227,165 +227,8 @@ if "current_quiz" not in st.session_state:
 st.set_page_config(layout="wide", page_title=f"Éditeur YAML - {FILE_PATH}",  
                    page_icon="1F4C3.png") #📃")
 
-hacks = '''# hack pour le file_uploader
-st.markdown("""
-<style>
 
-/* Zone compacte */
-div[data-testid="stFileUploader"] section[data-testid="stFileUploaderDropzone"] {
-    padding-top: 0.3rem;
-    padding-bottom: 0.3rem;
-    min-height: unset;
-}
-
-/* Cache cloud + textes */
-div[data-testid="stFileUploader"]
-section[data-testid="stFileUploaderDropzone"]
-div[data-testid="stFileUploaderDropzoneInstructions"] {
-    display: none;
-}
-
-/* Centre le bouton */
-div[data-testid="stFileUploader"]
-section[data-testid="stFileUploaderDropzone"]
-span[data-testid="stBaseButton-secondary"] {
-    margin: 0 auto;
-}
-
-/* Cache le nom du fichier + croix */
-div[data-testid="stFileUploader"] ul {
-    display: none;
-}
-
-</style>
-""", unsafe_allow_html=True)
-
-# fin hack pour le file_uploader
-
-st.markdown("""
-<style>
-
-
-input[aria-label="Titre du document"] {
-    font-size: 1.75rem !important;
-    font-weight: 600 !important;
-    border: none !important;
-    background: transparent !important;
-}
-
-input[aria-label="Titre du document"]:focus {
-    outline: none !important;
-    box-shadow: none !important;
-}
-
-</style>
-""", unsafe_allow_html=True)
-
-# Hack pour les st.sidebar.divider
-# Réduire la hauteur des dividers
-st.markdown(
-    """
-    <style>
-    section[data-testid="stSidebar"] hr {
-        margin-top: 0.25rem;
-        margin-bottom: 0.25rem;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-
-# Réduire le haut de page
-st.markdown(
-    """
-    <style>
-    .block-container {
-        padding-top: .0rem;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-
-# Condenser la sidebar
-st.markdown(
-    """
-    <style>
-    section[data-testid="stSidebar"] {
-        padding-top: 0rem;
-    }
-    section[data-testid="stSidebar"] .block-container {
-        gap: 0.35rem;
-    }
-    section[data-testid="stSidebar"] [data-testid="stVerticalBlock"] {
-        margin-bottom: 0.25rem;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-
-# le haut de la sidebar
-st.markdown(
-    """
-    <style>
-    /* Réduire la hauteur du header de la sidebar */
-    [data-testid="stSidebarHeader"] {
-        height: 1.0rem;  
-        min-height: 0.5rem;
-        padding: 0;
-        margin: 0;
-    }
-
-    /* Masquer le spacer (logo vide) */
-    [data-testid="stLogoSpacer"] {
-        display: none;
-    }
-
-    /* Ajuster le bouton collapse */
-    [data-testid="stSidebarCollapseButton"] {
-        margin-top: 0;
-        padding: 0;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-
-# Et la zone principale
-
-st.markdown(
-    """
-    <style>
-    /* Réduire la hauteur globale du header */
-    header[data-testid="stHeader"] {
-        height: 2rem;       /* valeur minimale souhaitée */
-        min-height: 2rem;
-        padding: 0;
-        margin: 0;
-    }
-
-    /* Toolbar interne */
-    div[data-testid="stToolbar"] {
-        padding: 0;
-        margin: 0;
-        height: 2rem;
-    }
-
-    /* Déployer button, menu etc. : s’assurer qu’ils restent visibles */
-    div[data-testid="stToolbarActions"],
-    div[data-testid="stAppDeployButton"],
-    span[data-testid="stMainMenu"] {
-        margin-top: 0;
-        padding-top: 0;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-'''
 # Le style qui ferait tout
-
 st.markdown("""
 <style>
 
@@ -605,10 +448,12 @@ def export_config_dialog(export_data, format_type):
                 key="download_full"
                 #on_click=st.rerun # Pour fermer ou rafraîchir après action
             )
+
+            _qo_crypt
             st.download_button(
                 label=f"⬇️ Télécharger {file_name}_qo_{mode}{extension} (questions only)",
                 data=st.session_state.output_qo_content,
-                file_name=f"{file_name}_{mode}_qo{extension}",
+                file_name=f"{file_name}_qo_{mode}{extension}",
                 mime=mime_type,
                 use_container_width=True,
                 type="primary",
