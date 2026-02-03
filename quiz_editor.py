@@ -158,6 +158,9 @@ if "fn_main" not in st.session_state:
 if "last_uploaded_file" not in st.session_state:
     st.session_state.last_uploaded_file = None
 
+if "output_content" not in st.session_state:
+    st.session_state.output_content = None
+
 def update_from_sidebar():
     val = st.session_state["fn_sidebar"]
     st.session_state["shared_fn"] = val
@@ -1053,24 +1056,34 @@ with col_save1:
     help="'Enregistrer sous'."
     )
 
+
 with col_save2:
     st.markdown("<div style='padding-top: 28px;'></div>", unsafe_allow_html=True)
 
-    fname = st.session_state.get("fn_main") or st.session_state["shared_fn"]
-
-    def build_yaml():
-        data_to_save = save_my_yaml_withoutst(fname)
+    def build_yaml(fname):
+        data_to_save = save_my_yaml(fname)
         stream = StringIO()
         yaml.dump(data_to_save, stream)
         return stream.getvalue()
 
-    st.download_button(
-        label="💾 Sauver et télécharger le YAML",
-        data=build_yaml,
-        file_name=fname,
-        mime="text/yaml",
-        width="stretch",
-    )
+    btn_save, btn_download = st.columns([1, 1], gap="small")
+
+    with btn_save:
+        if st.button("💾 Enregistrer", key="btn_main_save_final",width="stretch"):
+            fname = st.session_state.get("fn_main") or st.session_state["shared_fn"]
+            st.session_state.output_content = build_yaml(fname)
+            st.toast("YAML nettoyé et enregistré✔️")
+
+    with btn_download:
+        if st.session_state.output_content is not None:
+            st.download_button(
+                label="⬇ Télécharger le YAML",
+                data=st.session_state.output_content,
+                file_name=fname,
+                mime="text/yaml",
+                width="stretch",
+                help="Uniquement APRÈS avoir enregistré le YAML"
+            )
 
 
 if st.session_state.current_quiz:
