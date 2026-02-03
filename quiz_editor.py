@@ -106,6 +106,26 @@ def save_my_yaml(filename):
     st.success(f"Fichier enregistré proprement sous `{filename}`")
     return data_to_save
 
+def save_my_yaml_withoutst(filename):
+    # 1. On initialise ruamel.yaml proprement
+    yaml_format = YAML()
+    yaml_format.preserve_quotes = True
+    yaml_format.indent(mapping=2, sequence=4, offset=2) 
+    
+    # 2. Nettoyage des contraintes vides
+    # On travaille sur une copie ou directement si on accepte la modif en session
+    data_to_save = st.session_state.data
+    for q in list(data_to_save.keys()):
+        obj = data_to_save[q]
+        if isinstance(obj, dict) and 'constraints' in obj and not obj['constraints']:
+            del obj['constraints']
+    
+    # 3. Écriture avec ruamel (pour éviter les tags !!python/object)
+    with open(filename, 'w', encoding='utf-8') as f:
+        yaml_format.dump(data_to_save, f)
+
+    return data_to_save
+
 # Pour exports
 if 'selected_for_export' not in st.session_state:
     # On initialise avec False pour tous les quiz existants
@@ -819,17 +839,6 @@ if st.sidebar.button("➕ Nouveau Quiz", use_container_width=True):
 
 #st.sidebar.divider()
 
-xzz = """
-# 3. BOUTON ENREGISTRER (SYNC)
-st.sidebar.subheader("💾 Sauvegarde Rapide")
-
-st.sidebar.text_input("Nom du fichier", key="fn_sidebar", on_change=update_from_sidebar)
-
-if st.sidebar.button("💾 SAUVEGARDER (Sidebar)", key="btn_side_save"):
-    # On utilise .get() avec une valeur de secours pour éviter le crash
-    fname = st.session_state.get("fn_sidebar") or st.session_state["shared_fn"]
-    save_my_yaml(fname)
-"""
 
 # --- SECTION EXPORT (Nouvelle version)---
 st.sidebar.divider()
@@ -1049,7 +1058,7 @@ with col_save1:
     fname = st.session_state.get("fn_main") or st.session_state["shared_fn"]
 
     def build_yaml():
-        data_to_save = save_my_yaml(fname)
+        data_to_save = save_my_yaml_withoutst(fname)
         stream = StringIO()
         yaml.dump(data_to_save, stream)
         return stream.getvalue()
