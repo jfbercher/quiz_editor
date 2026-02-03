@@ -225,7 +225,7 @@ if "current_quiz" not in st.session_state:
 # -----------------------------------
 
 st.set_page_config(layout="wide", page_title=f"Éditeur YAML - {FILE_PATH}",  
-                   page_icon="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1F4C3.png") #📃")
+                   page_icon="1F4C3.png") #📃")
 
 hacks = '''# hack pour le file_uploader
 st.markdown("""
