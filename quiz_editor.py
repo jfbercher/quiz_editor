@@ -353,19 +353,30 @@ def prepare_data(indata, output_file, mode="crypt", pwd=""):
         data_only_out = data_only
         
     if mode == "crypt" and pwd != '':
-        st.warning("⚠️ File crypted with pwd. Ensure to use the `madatoryInternet=True` option in quiz init")    
+        st.warning("⚠️ File crypted with pwd. Ensure to use the `mandatoryInternet=True` option in quiz init")    
     
     return data_out, data_only_out
 
 # Exports possibles (dans la sidebar)
 @st.dialog("Configuration de l'export")
-def export_config_dialog(export_data, format_type):
+def export_config_dialog(selected_qids, format_type):
     st.subheader(f"Format : {format_type}")
     
     # Champ commun : Nom du fichier
     default_name = "mon_quiz"
     file_name = st.text_input("Nom du fichier (sans extension)", value=default_name)
-    
+    reindex_labels = st.checkbox("Réindexer les labels de questions", 
+                    help="Réindexe pour assurer la continuité des labels, eg: quiz1, quiz2, etc", value=False)
+
+    export_data = {"title": data.get('title', 'Sans titre')}    
+    if reindex_labels:
+        for i, old_id in enumerate(selected_qids):
+            export_data[f"quiz{i+1}"] = copy.deepcopy(data[old_id])
+    else:
+        for old_id in selected_qids:
+            export_data[old_id] = copy.deepcopy(data[old_id])
+
+    # Initialisation des variables  
     output_content = ""
     output_qo_content = ""
     extension = ""
@@ -438,10 +449,14 @@ def export_config_dialog(export_data, format_type):
         else:
             st.session_state.output_content = str(output_content)
             st.session_state.output_qo_content = str(output_qo_content)
+            if mode == "yml": 
+                mode = ""
+            else:
+                mode = f"_{mode}"
             st.download_button(
-                label=f"⬇️ Télécharger {file_name}_{mode}{extension}",
+                label=f"⬇️ Télécharger {file_name}{mode}{extension}",
                 data=st.session_state.output_content,
-                file_name=f"{file_name}_{mode}{extension}",
+                file_name=f"{file_name}{mode}{extension}",
                 mime=mime_type,
                 use_container_width=True,
                 type="primary",
@@ -450,9 +465,9 @@ def export_config_dialog(export_data, format_type):
             )
 
             st.download_button(
-                label=f"⬇️ Télécharger {file_name}_qo_{mode}{extension} (questions only)",
+                label=f"⬇️ Télécharger {file_name}_qo{mode}{extension} (questions only)",
                 data=st.session_state.output_qo_content,
-                file_name=f"{file_name}_qo_{mode}{extension}",
+                file_name=f"{file_name}_qo{mode}{extension}",
                 mime=mime_type,
                 use_container_width=True,
                 type="primary",
@@ -517,35 +532,6 @@ quiz_ids = [k for k in data.keys() if k != 'title']
 # --- Dans la sidebar, calcul des compteurs ---
 quiz_ids_all = [k for k in data.keys() if k != 'title']
 
-# 1. Compter les occurrences de chaque catégorie
-filtrage_ancien = """
-from collections import Counter
-counts = Counter(data[qid].get('category', 'Aucune') for qid in quiz_ids_all)
-
-# 2. Préparer la liste des catégories triées
-raw_categories = sorted([c for c in counts.keys() if c != 'Aucune'])
-if 'Aucune' in counts:
-    raw_categories.insert(0, 'Aucune')
-
-# 3. Créer les labels d'affichage avec les compteurs
-# On garde un dictionnaire pour retrouver le nom réel de la catégorie après sélection
-cat_display_map = {f"{c} ({counts[c]})": c for c in raw_categories}
-cat_display_map[f"Toutes ({len(quiz_ids_all)})"] = "Toutes"
-
-cat_options_display = list(cat_display_map.keys())
-
-# 4. Widget Selectbox
-selected_display = st.sidebar.selectbox(
-    "Filtrer par catégorie", 
-    cat_options_display,
-    index=st.session_state.get('last_cat_idx', 0)
-)
-st.session_state.last_cat_idx = cat_options_display.index(selected_display)
-
-# 5. Récupération de la vraie valeur pour le filtrage
-selected_cat = cat_display_map[selected_display]
-"""
-
 # Filtre Catégorie (utilise sorted_cats préparé plus haut)
 cat_options = [f"Toutes ({len(quiz_ids_all)})"] + [f"{c} ({cat_counts[c]})" for c in sorted_cats]
 selected_cat_ui = st.sidebar.selectbox("Catégorie", cat_options)
@@ -583,36 +569,9 @@ else:
 quiz_ids = filtered_ids
 # -----
 
-bozo = """cat_options = ["Toutes"] + category_list
-selected_cat = st.sidebar.selectbox(
-    "Filtrer par catégorie", 
-    cat_options,
-    index=st.session_state.get('last_cat_idx', 0)
-)
 
-# On mémorise l'index pour le prochain rerun
-st.session_state.last_cat_idx = cat_options.index(selected_cat)
 
-# Filtrage effectif
-if selected_cat == "Toutes":
-    quiz_ids = quiz_ids_all
-else:
-    quiz_ids = [qid for qid in quiz_ids_all if data[qid].get('category', 'Aucune') == selected_cat]
-"""
-
-# --- Le reste de votre logique de navigation ---
-machin = '''if 'current_quiz' not in st.session_state or st.session_state.current_quiz not in quiz_ids:
-    st.session_state.current_quiz = quiz_ids[0] if quiz_ids else None
-
-selected_quiz = st.sidebar.selectbox(
-    f"Choisir une question parmi {len(filtered_ids)}", 
-    quiz_ids, 
-    key="current_quiz", #"nav_select", 
-    index=quiz_ids.index(st.session_state.current_quiz) if st.session_state.current_quiz in quiz_ids else 0
-)
-st.session_state.current_quiz = selected_quiz
-'''
-# On trouve la position de la question actuelle dans la liste
+# Position de la question actuelle dans la liste
 idx = filtered_ids.index(st.session_state.current_quiz) if st.session_state.current_quiz in filtered_ids else 0
 
 selected_quiz = st.sidebar.selectbox(
@@ -735,7 +694,7 @@ selected_qids = [qid for qid in quiz_ids if st.session_state.selected_for_export
 if selected_qids:
     st.sidebar.markdown(f"**{len(selected_qids)} question(s) sélectionnée(s)**")
     
-    # Préparation de l'export_data réindexé (votre logique existante)
+    # Préparation de l'export_data réindexé 
     export_data = {"title": data.get('title', 'Sans titre')}
     for i, old_id in enumerate(selected_qids):
         export_data[f"quiz{i+1}"] = copy.deepcopy(data[old_id])
@@ -748,7 +707,7 @@ if selected_qids:
 
     if export_format != "---":
         if st.sidebar.button("Configurer & Exporter", use_container_width=True):
-            export_config_dialog(export_data, export_format)
+            export_config_dialog(selected_qids, export_format)
             
 
 
@@ -756,100 +715,6 @@ else:
     st.sidebar.info("Cochez des questions pour exporter.")
 
 
-zzz = """
-# --- SECTION EXPORT ---
-st.sidebar.divider()
-st.sidebar.title("📤 Exportation")
-
-# Initialisation du dictionnaire de sélection
-if 'selected_for_export' not in st.session_state:
-    st.session_state.selected_for_export = {qid: False for qid in quiz_ids}
-
-# 1. BOUTONS TOUT COCHER / DÉCOCHER
-col_all1, col_all2 = st.sidebar.columns(2)
-if col_all1.button("✅ Tout cocher", use_container_width=True):
-    for qid in quiz_ids:
-        st.session_state.selected_for_export[qid] = True
-        # On force la mise à jour des clés des widgets
-        st.session_state[f"check_side_{qid}"] = True
-        st.session_state[f"check_main_{qid}"] = True
-    st.rerun()
-
-if col_all2.button("❌ Tout décocher", use_container_width=True):
-    for qid in quiz_ids:
-        st.session_state.selected_for_export[qid] = False
-        st.session_state[f"check_side_{qid}"] = False
-        st.session_state[f"check_main_{qid}"] = False
-    st.rerun()
-
-# 2. ZONE DE SÉLECTION (Cases à cocher)
-with st.sidebar.expander("Sélectionner les questions", expanded=False):
-    for qid in quiz_ids:
-        side_key = f"check_side_{qid}"
-        # On s'assure que la clé du widget existe et est alignée sur le dictionnaire
-        if side_key not in st.session_state:
-            st.session_state[side_key] = st.session_state.selected_for_export.get(qid, False)
-
-        st.checkbox(
-            qid, 
-            key=side_key,
-            on_change=sync_export,
-            args=(qid, side_key)
-        )
-        
-        
-        
-
-# 3. PRÉPARATION DES DONNÉES ET RÉINDEXATION
-selected_qids = [qid for qid in quiz_ids if st.session_state.selected_for_export.get(qid, False)]
-
-if selected_qids:
-    
-    # Création du nouvel objet avec réindexation
-    export_data = {"title": f"Export - {data.get('title', 'Sans titre')}"}
-    
-    for i, old_id in enumerate(selected_qids):
-        new_id = f"quiz{i+1}"
-        # On utilise deepcopy pour isoler totalement les données exportées
-        export_data[new_id] = copy.deepcopy(data[old_id])
-    
-    # Génération du flux YAML
-    stream = io.StringIO()
-    yaml.dump(export_data, stream)
-    yaml_string = stream.getvalue()
-    
-    # 4. BOUTON DE TÉLÉCHARGEMENT
-    st.sidebar.download_button(
-        label=f"💾 Télécharger ({len(selected_qids)} questions)",
-        data=yaml_string,
-        file_name="quiz_export.yaml",
-        mime="text/yaml",
-        use_container_width=True,
-        type="primary"
-    )
-
-    # --- BOUTON EXPORT AMC ---
-    st.sidebar.markdown("---")
-    st.sidebar.subheader("📤 Export LaTeX")
-    neg_points = st.sidebar.checkbox("Points négatifs (malus -1)", value=True)
-    
-    if st.sidebar.button("📄 Générer code AMC (LaTeX)", use_container_width=True):
-        from amc_exporter import convert_to_amc_latex
-        
-        # On passe l'option à la fonction
-        amc_code = convert_to_amc_latex(export_data, use_negative_points=neg_points)
-        
-        st.sidebar.download_button(
-            label="⬇️ Télécharger le .tex",
-            data=amc_code,
-            file_name="quiz_amc.tex",
-            mime="text/x-tex",
-            use_container_width=True
-        )
-else:
-    st.sidebar.info("Cochez des questions pour exporter.")
-
-"""
 
 wzz = """ #Commenté car double emploi zone centrale
 # ----- PARAMETRES GENERAUX -----
@@ -939,25 +804,6 @@ if st.session_state.current_quiz:
     st.divider()
     #st.subheader(f"Édition de : {q_id}")
 
-    avant = '''   #ajout synchro export
-    col_title, col_check = st.columns([4, 1])
-
-    with col_title:
-        st.subheader(f"Édition de {selected_quiz}")
-
-    with col_check:
-        main_key = f"check_main_{selected_quiz}"
-        
-        st.session_state[main_key] = st.session_state.selected_for_export.get(selected_quiz, False)
-
-        st.checkbox(
-            "Exporter", 
-            key=main_key,
-            on_change=sync_export,
-            args=(selected_quiz, main_key),
-            help="Cocher pour inclure cette question dans le futur export YAML"
-        )
-'''
 ## avec flèches avant/après
 if st.session_state.current_quiz and filtered_ids:
     current_idx = filtered_ids.index(st.session_state.current_quiz)
@@ -1044,14 +890,6 @@ if st.session_state.current_quiz and filtered_ids:
                 q_data['category'] = selected_from_menu
                 st.rerun()
 
-    out = '''with col_cat2:
-        # Alignement vertical
-        st.markdown("<div style='height: 28px;'></div>", unsafe_allow_html=True)
-        if all_cats:
-            # On ré-affiche le joli bloc bleu avec la liste globale pour rappel
-            st.info(f"**Existantes :**\n{', '.join(all_cats)}")
-        else:
-            st.caption("Aucune autre catégorie définie.")'''
     # fin one more
     with col_cat2:
         current_tags = q_data.get('tags', [])
