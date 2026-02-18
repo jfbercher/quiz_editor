@@ -5,30 +5,61 @@ import os
 import re
 
 # Simulateur de f-strings
-import numpy as np # Pour la simulation dans le validateur
+import numpy as np # For simulation in the validator
 import random
-import ast  #Pour la simulation dans le validateur
+import ast  #For simulation in the validator
 import tokenize
 import io, copy
 from io import StringIO
 from collections import Counter
 import ast
+from convert_quiz_format import convert_quiz_data_v1_to_v2
+#from i18n import _
 
+from i18n import init_i18n, set_language, get_translator
+
+
+_ = init_i18n(default_lang="en")
+
+# Language selection
+#lang = st.sidebar.selectbox("Language", ["🇬🇧 en", "🇫🇷 fr"], index=["en", "fr"].index(st.session_state.lang))
+languages = {
+    "en": "🇬🇧 English",
+    "fr": "🇫🇷 Français",
+    "es": "🇪🇸 Spanish",
+}
+
+lang = st.sidebar.selectbox(
+    "Language",
+    options=list(languages.keys()),
+    format_func=lambda x: languages[x],
+    index=list(languages.keys()).index(st.session_state.lang),
+)
+
+if lang != st.session_state.lang:
+    #print(f"Language changed from {st.session_state.lang} to {lang}")
+    if "quiz_title" in st.session_state and st.session_state.quiz_title == _("New Quiz"): 
+        _ = set_language(lang)
+        st.session_state.quiz_title = _("New Quiz")
+    else:
+        _ = set_language(lang)
+    st.rerun()
 
 
 def trigger_rerun():
-    # Cette fonction ne fait rien d'autre que forcer Streamlit 
-    # à relire tout le script avec les nouvelles valeurs.
+    # This function does nothing other than force Streamlit 
+    # to reread the entire script with the new values.
     pass
 
 
 def sync_export(qid, source_key):
-    # On récupère la valeur du widget qui vient de changer
+    # We retrieve the value of the widget that has just changed
+
     val = st.session_state[source_key]
-    # On met à jour le dictionnaire de référence
+    # We update the reference dictionary
     st.session_state.selected_for_export[qid] = val
     
-    # On synchronise l'autre widget pour qu'il soit à jour au prochain affichage
+    # We synchronize the other widget so that it is up to date on the next display
     other_key = f"check_side_{qid}" if "main" in source_key else f"check_main_{qid}"
     st.session_state[other_key] = val
 
@@ -42,12 +73,12 @@ def validate_fstring(text):
         if start == -1: break
         
         end_brace = text.find('}', start)
-        if end_brace == -1: return "⚠️ Accolade non fermée"
+        if end_brace == -1: return _("⚠️ Unclosed brace")
             
         full_block = text[start+1:end_brace].replace('\n', '')
         
-        # On essaie d'isoler la partie 'code' du 'formatage'
-        # On cherche le ":" le plus à droite qui n'est pas dans des parenthèses
+        # We try to isolate the 'code' part from the 'formatting' 
+        # We are looking for the rightmost ":" which is not in parentheses
         code_part = full_block
         bracket_level = 0
         for i in range(len(full_block)-1, -1, -1):
@@ -61,49 +92,46 @@ def validate_fstring(text):
         try:
             ast.parse(code_part.strip(), mode='eval')
         except SyntaxError as e:
-            return f"⚠️ Erreur dans '{{{code_part.strip()}}}' : {e.msg}"
+            return f"⚠️ Error in '{{{code_part.strip()}}}' : {e.msg}"
             
         start = end_brace + 1
     return None
 
 # Preview LaTeX
 def render_preview(label, text):
-    """Affiche un aperçu si du LaTeX ou du Markdown est présent."""
+    """Displays a preview if LaTeX or Markdown is present."""
     if text and ('$' in text or '{' in text):
         with st.container():
             #st.caption(f"Aperçu du rendu ({label}) :")
             st.markdown(
-                f"<div style='font-size:0.8rem; color:gray; margin-bottom:-0.2rem;'>"
-                f"Aperçu du rendu ({label}) :</div>",
+                f"<div style='font-size:0.8rem; color:gray; margin-bottom:-0.2rem;'>" \
+                + _("Render preview ({label}) :</div>").format(label=label),
         unsafe_allow_html=True
     )
-            st.info(text) # st.info rend le Markdown et le LaTeX entre $ nativement
+            st.info(text) # st.info renders Markdown and LaTeX between $ natively
 
 from ruamel.yaml import YAML
 
 def save_my_yaml(filename):
-    # 1. On initialise ruamel.yaml proprement
     yaml_format = YAML()
     yaml_format.preserve_quotes = True
     yaml_format.indent(mapping=2, sequence=4, offset=2)
     
     if not filename:
-        st.error("Le nom du fichier ne peut pas être vide.")
+        st.error(_("The file name cannot be empty."))
         return
     
-    # 2. Nettoyage des contraintes vides
-    # On travaille sur une copie ou directement si on accepte la modif en session
+    # Cleaning Empty Constraints
     data_to_save = st.session_state.data
     for q in list(data_to_save.keys()):
         obj = data_to_save[q]
         if isinstance(obj, dict) and 'constraints' in obj and not obj['constraints']:
             del obj['constraints']
     
-    # 3. Écriture avec ruamel (pour éviter les tags !!python/object)
     with open(filename, 'w', encoding='utf-8') as f:
         yaml_format.dump(data_to_save, f)
     
-    st.success(f"Fichier enregistré proprement sous `{filename}`")
+    st.success(_("File saved successfully as `{filename}`").format(filename=filename))
     return data_to_save
 
 def save_my_yaml_withoutst(filename):
@@ -112,15 +140,12 @@ def save_my_yaml_withoutst(filename):
     yaml_format.preserve_quotes = True
     yaml_format.indent(mapping=2, sequence=4, offset=2) 
     
-    # 2. Nettoyage des contraintes vides
-    # On travaille sur une copie ou directement si on accepte la modif en session
     data_to_save = st.session_state.data
     for q in list(data_to_save.keys()):
         obj = data_to_save[q]
         if isinstance(obj, dict) and 'constraints' in obj and not obj['constraints']:
             del obj['constraints']
     
-    # 3. Écriture avec ruamel (pour éviter les tags !!python/object)
     with open(filename, 'w', encoding='utf-8') as f:
         yaml_format.dump(data_to_save, f)
 
@@ -132,8 +157,8 @@ if 'selected_for_export' not in st.session_state:
     st.session_state.selected_for_export = {}
 
 
-# --- CONFIGURATION YAML ---
-# Utilisation de ruamel.yaml pour conserver le formatage et les styles de citations
+# --- YAML CONFIGURATION  ---
+# 
 yaml = YAML()
 yaml.preserve_quotes = True 
 yaml.indent(mapping=2, sequence=4, offset=2)
@@ -144,12 +169,11 @@ if len(sys.argv) > 1 and sys.argv[1].endswith(('.yaml', '.yml')):
 else:
     FILE_PATH = "quiz.yaml"
 
-# Initialisation
-# Initialisation des variables de session
+# Initialization
+# Initialization of session variables
 if "shared_fn" not in st.session_state:
     st.session_state["shared_fn"] = FILE_PATH
 
-# IMPORTANT : On pré-remplit les clés des widgets pour éviter le vide au chargement
 if "fn_sidebar" not in st.session_state:
     st.session_state["fn_sidebar"] = st.session_state["shared_fn"]
 if "fn_main" not in st.session_state:
@@ -173,34 +197,47 @@ def update_from_main():
 
 
 
-# fin hack pour le file_uploader
 def load_data():
     if not os.path.exists(FILE_PATH):
-        return {"title": "Nouveau Quiz", "quiz1": {"question": "", "propositions": []}}
+        return {"title": _("New Quiz"), "quiz1": {"question": "", "propositions": []}}
     with open(FILE_PATH, 'r', encoding='utf-8') as f:
-        return yaml.load(f)
+        data = yaml.load(f)
+        data = convert_quiz_data_v1_to_v2(data)
+        return data
 
-# Initialisation de la session pour la persistance des données
+# Session initialization for data persistence
 if 'data' not in st.session_state:
     st.session_state.data = load_data()
 
+
+if "quiz_title" not in st.session_state:
+    st.session_state.quiz_title = st.session_state.data.get("title", _("Enter a title here"))
+
+def extract_key_number(key):
+    match = re.search(r'(\d+)$', key)
+    return int(match.group(1)) if match else 0
+
+def natural_key(string_): #Gemini
+    """Splits the string into a list of strings and integers."""
+    return [int(s) if s.isdigit() else s.lower() for s in re.split(r'(\d+)', string_)]
+
+# sort data
 data = st.session_state.data
-st.session_state["quiz_title"] = st.session_state.data.get("title", "Entrez un titre ici")
+st.session_state.data = {k: data[k] for k in sorted(data, key=natural_key)} #extract_key_number)}
+data = st.session_state.data
 
 
-
-#%%% ajout
-# --- 2. PRÉPARATION DES DONNÉES  ---
+# ---  DATA PREPARATION ---
 
 quiz_ids_all = [k for k in data.keys() if k != 'title']
 
-# On collecte tout en une seule passe
+# We collect everything in one go
 all_categories = set()
 all_tags = set()
 cat_counts = Counter()
 
 for qid in quiz_ids_all:
-    cat = data[qid].get('category', 'Aucune')
+    cat = data[qid].get('category', _('None'))
     all_categories.add(cat)
     cat_counts[cat] += 1
     
@@ -208,113 +245,112 @@ for qid in quiz_ids_all:
     if isinstance(tags, list):
         all_tags.update(tags)
 
-if "Aucune" in all_categories:
-    all_categories.remove('Aucune') #insert(0, all_categories.pop(all_categories.index("Aucune")))
-# On prépare les listes triées pour les widgets
+if _("None") in all_categories:
+    all_categories.remove(_('None')) #insert(0, all_categories.pop(all_categories.index("Aucune")))
+# Set up sorted lists for the widgets
 sorted_cats = sorted(list(all_categories))
 category_list = sorted_cats
 sorted_tags = sorted(list(all_tags))
 
 if "current_quiz" not in st.session_state:
-    # On initialise avec le premier quiz de la liste, s'il y en a un
+    # We initialize with the first quiz in the list, if there is one.
     st.session_state.current_quiz = quiz_ids_all[0] if quiz_ids_all else None
 
-#%%% fin ajout
 
 
 # -----------------------------------
 
-st.set_page_config(layout="wide", page_title=f"Éditeur YAML - {FILE_PATH}",  
+st.set_page_config(layout="wide", page_title=_("YAML Editor - {FILE_PATH}").format(FILE_PATH=FILE_PATH),  
                    page_icon="1F4C3.png") #📃")
 
 
-# Le style qui ferait tout
+# --- STYLE ---
 st.markdown("""
 <style>
 
 /* ===== File Uploader compact ===== */
-div[data-testid="stFileUploader"] section[data-testid="stFileUploaderDropzone"] {
+div[data-testid="stFileUploader"] section[data-testid="stFileUploaderDropzone"] {{
     padding-top: 0.3rem;
     padding-bottom: 0.3rem;
     min-height: unset;
-}
-div[data-testid="stFileUploader"] section[data-testid="stFileUploaderDropzone"] div[data-testid="stFileUploaderDropzoneInstructions"] {
+}}
+div[data-testid="stFileUploader"] section[data-testid="stFileUploaderDropzone"] div[data-testid="stFileUploaderDropzoneInstructions"] {{
     display: none;
-}
-div[data-testid="stFileUploader"] section[data-testid="stFileUploaderDropzone"] span[data-testid="stBaseButton-secondary"] {
+}}
+div[data-testid="stFileUploader"] section[data-testid="stFileUploaderDropzone"] span[data-testid="stBaseButton-secondary"] {{
     margin: 0 auto;
-}
-div[data-testid="stFileUploader"] ul {
+}}
+div[data-testid="stFileUploader"] ul {{
     display: none;
-}
+}}
 
-/* ===== Titre principal ===== */
-input[aria-label="Titre du document"] {
+/* ===== Main title ===== */
+input[aria-label="{doctitle}"] {{
     font-size: 1.75rem !important;
     font-weight: 600 !important;
     border: none !important;
     background: transparent !important;
-}
-input[aria-label="Titre du document"]:focus {
+}}
+input[aria-label="{doctitle}"]:focus {{
     outline: none !important;
     box-shadow: none !important;
-}
+}}
 
 /* ===== Sidebar ===== */
-section[data-testid="stSidebar"] {
+section[data-testid="stSidebar"] {{
     padding-top: 0rem;
-}
-section[data-testid="stSidebar"] .block-container {
+}}
+section[data-testid="stSidebar"] .block-container {{
     gap: 0.35rem;
-}
-section[data-testid="stSidebar"] [data-testid="stVerticalBlock"] {
+}}
+section[data-testid="stSidebar"] [data-testid="stVerticalBlock"] {{
     margin-bottom: 0.25rem;
-}
-section[data-testid="stSidebar"] hr {
+}}
+section[data-testid="stSidebar"] hr {{
     margin-top: 0.25rem;
     margin-bottom: 0.25rem;
-}
-[data-testid="stSidebarHeader"] {
+}}
+[data-testid="stSidebarHeader"] {{
     height: 1.0rem;
     min-height: 0.5rem;
     padding: 0;
     margin: 0;
-}
-[data-testid="stLogoSpacer"] {
+}}
+[data-testid="stLogoSpacer"] {{
     display: none;
-}
-[data-testid="stSidebarCollapseButton"] {
+}}
+[data-testid="stSidebarCollapseButton"] {{
     margin-top: 0;
     padding: 0;
-}
+}}
 
 /* ===== Header principal ===== */
-header[data-testid="stHeader"] {
+header[data-testid="stHeader"] {{
     height: 2rem;
     min-height: 2rem;
     padding: 0;
     margin: 0;
-}
-div[data-testid="stToolbar"] {
+}}
+div[data-testid="stToolbar"] {{
     padding: 0;
     margin: 0;
     height: 2rem;
-}
+}}
 div[data-testid="stToolbarActions"],
 div[data-testid="stAppDeployButton"],
-span[data-testid="stMainMenu"] {
+span[data-testid="stMainMenu"] {{
     margin-top: 0;
     padding-top: 0;
-}
+}}
 
 /* ===== Container principal ===== */
-.block-container {
+.block-container {{
     padding-top: 0rem;
     padding-bottom: 0.5rem;
-}
+}}
 
 </style>
-""", unsafe_allow_html=True)
+""".format(doctitle=_("Document Title")), unsafe_allow_html=True)
 
 def prepare_data(indata, output_file, mode="crypt", pwd=""):    
     from labquiz.putils import crypt_data, encode_data
@@ -324,19 +360,19 @@ def prepare_data(indata, output_file, mode="crypt", pwd=""):
     # Lecture du fichier YAML
     data = copy.deepcopy(indata)
 
-    # Mélange des propositions pour chaque quiz
+    # Suffle propositions for each quiz
     for quiz_name, quiz_content in data.items():
         if "propositions" in quiz_content:
             random.shuffle(quiz_content["propositions"])
             
     # Questions only
     data_only = copy.deepcopy(data)
-    # suppression indices pour chaque quiz
+    # removing hints for every quiz
     for quiz_name, quiz_content in data_only.items():
         if quiz_name == "title": continue 
         quiz_content.pop("constraints", None)
         for prop in quiz_content["propositions"]:
-            keys_to_remove = {"expected", "reponse", "tip"}
+            keys_to_remove = {"expected", "answer", "tip"}
             for k in keys_to_remove:
                 prop.pop(k, None)
   
@@ -353,22 +389,24 @@ def prepare_data(indata, output_file, mode="crypt", pwd=""):
         data_only_out = data_only
         
     if mode == "crypt" and pwd != '':
-        st.warning("⚠️ File crypted with pwd. Ensure to use the `mandatoryInternet=True` option in quiz init")    
+        st.warning(_("⚠️ File encrypted with password. Be sure to use the `mandatoryInternet=True` option when initializing the quiz")) 
+        #("⚠️ File crypted with pwd. Ensure to use the `mandatoryInternet=True` option in quiz init")   
+        #st.warning("⚠️ File crypted with pwd. Ensure to use the `mandatoryInternet=True` option in quiz init")    
     
     return data_out, data_only_out
 
 # Exports possibles (dans la sidebar)
-@st.dialog("Configuration de l'export")
+@st.dialog(_("Configure & Export"))
 def export_config_dialog(selected_qids, format_type):
     st.subheader(f"Format : {format_type}")
     
-    # Champ commun : Nom du fichier
-    default_name = "mon_quiz"
-    file_name = st.text_input("Nom du fichier (sans extension)", value=default_name)
-    reindex_labels = st.checkbox("Réindexer les labels de questions", 
-                    help="Réindexe pour assurer la continuité des labels, eg: quiz1, quiz2, etc", value=False)
+    # Common field: Filename
+    default_name = _("my_quiz")
+    file_name = st.text_input(_("File name (without extension)"), value=default_name)
+    reindex_labels = st.checkbox(_("Reindex question labels"), 
+                    help=_("Reindex to ensure continuity of labels, e.g.: quiz1, quiz2, etc."), value=False)
 
-    export_data = {"title": data.get('title', 'Sans titre')}    
+    export_data = {"title": data.get('title', _('Untitled'))}    
     if reindex_labels:
         for i, old_id in enumerate(selected_qids):
             export_data[f"quiz{i+1}"] = copy.deepcopy(data[old_id])
@@ -383,19 +421,19 @@ def export_config_dialog(selected_qids, format_type):
     mime_type = ""
 
     # Options spécifiques selon le format
-    if format_type == "Extrait (YAML)":
-        fmt = st.radio("Type d'export", ["YAML crypté", "YAML encodé", "YAML sans encodage"])
+    if format_type == _("Extract (YAML)"):
+        fmt = st.radio("Type d'export", [_("Encrypted YAML"), _("Encoded YAML"), _("Unencoded YAML")])
         pwd = ""
-        if fmt == "YAML crypté":
+        if fmt == _("Encrypted YAML"):
             mode = "crypt"
-        elif fmt == "YAML encodé":
+        elif fmt == _("Encoded YAML"):
             mode = "enc"
         else:
             mode = "yml"
         if mode == "crypt":
             col_crypt1, col_crypt2  = st.columns([6, 4])
             with col_crypt1:
-                pwd = st.text_input("Mot de passe", type="password", help="💡 Ce pwd participe à l'encryption")
+                pwd = st.text_input(_("Password"), type="password", help=_("💡 This pwd participates in encryption"))
         outdata, outdata_only = prepare_data(export_data, file_name, mode=mode, pwd=pwd)
         stream = StringIO()
         yaml.dump(outdata, stream)
@@ -405,46 +443,46 @@ def export_config_dialog(selected_qids, format_type):
         output_qo_content = stream2.getvalue()
         extension = ".yaml"
         mime_type = "text/plain"
-        st.info("💡 Ce mode permet de sauvegarder tout ou partie des questions en un nouveau fichier, "
-        "avec encryptage optionnel. ")
+        st.info(_("💡 This mode allows you to save all or part of the questions in a new file, ") \
+        + _("with optional encryption."))
 
-    if format_type == "Interactif (Entraînement)":
+    if format_type == _("Interactive (self-assessment)"):
         from convert_to_interactive_html import convert_to_interactive_html
         output_content = convert_to_interactive_html(export_data)
         extension = ".html"
         mime_type = "text/html"
-        st.info("💡 Ce mode permet l'autocorrection immédiate pour les élèves.")
+        st.info(_("💡 This mode allows immediate self-correction for students."))
 
-    elif format_type == "Examen (Serveur)":
-        server_url = st.text_input("URL du serveur de réception", placeholder="https://script.google.com/...")
+    elif format_type == _("Exam (Server)"):
+        server_url = st.text_input(_("Receiving server URL"), placeholder="https://script.google.com/...")
         if server_url:
             from convert_to_html_exam import convert_to_server_quiz
             output_content = convert_to_server_quiz(export_data, server_url)
             extension = ".html"
             mime_type = "text/html"
         else:
-            st.warning("Veuillez saisir l'URL du serveur pour continuer.")
+            st.warning(_("Please enter the server URL to continue."))
 
     elif format_type == "AMC (LaTeX)":
-        neg_points = st.checkbox("Points négatifs (malus -1)", value=True)
+        neg_points = st.checkbox(_("Negative points (-1 malus)"), value=True)
         from amc_exporter import convert_to_amc_latex
         output_content = convert_to_amc_latex(export_data, use_negative_points=neg_points)
         extension = ".tex"
         mime_type = "text/x-tex"
-        st.info("💡 Extraction au format LaTeX-AMC.")
+        st.info(_("💡 Extraction in LaTeX-AMC format."))
 
     # Bouton de téléchargement final
     if output_content:
         st.divider()
-        if not format_type == "Extrait (YAML)":
+        if not format_type == _("Extract (YAML)"):
             st.download_button(
-                label=f"⬇️ Télécharger {file_name}{extension}",
+                label=_("⬇️ Download {file_name}{extension}").format(file_name=file_name, extension=extension),
                 data=output_content,
                 file_name=f"{file_name}{extension}",
                 mime=mime_type,
                 use_container_width=True,
                 type="primary",
-                #on_click=st.rerun # Pour fermer ou rafraîchir après action
+                #on_click=st.rerun # To refresh after action
             )
         else:
             st.session_state.output_content = str(output_content)
@@ -454,108 +492,110 @@ def export_config_dialog(selected_qids, format_type):
             else:
                 mode = f"_{mode}"
             st.download_button(
-                label=f"⬇️ Télécharger {file_name}{mode}{extension}",
+                label=_("⬇️ Download {file_name}{mode}{extension}").format(file_name=file_name, mode=mode, extension=extension),
                 data=st.session_state.output_content,
                 file_name=f"{file_name}{mode}{extension}",
                 mime=mime_type,
                 use_container_width=True,
                 type="primary",
                 key="download_full"
-                #on_click=st.rerun # Pour fermer ou rafraîchir après action
+                #on_click=st.rerun # To refresh after action
             )
 
             st.download_button(
-                label=f"⬇️ Télécharger {file_name}_qo{mode}{extension} (questions only)",
+                label=_("⬇️ Download {file_name}_qo{mode}{extension} (questions only)").format(file_name=file_name, mode=mode, extension=extension),
                 data=st.session_state.output_qo_content,
                 file_name=f"{file_name}_qo{mode}{extension}",
                 mime=mime_type,
                 use_container_width=True,
                 type="primary",
                 key="download_qo"
-                #on_click=st.rerun # Pour fermer ou rafraîchir après action
+                #on_click=st.rerun # To refresh after action
             )
 
 
-# --- BARRE LATÉRALE (SIDEBAR) ---
+# --- SIDEBAR ---
 data = st.session_state.data
 
 
-st.sidebar.title("📂 Navigation")
+st.sidebar.title(_("📂 Browse"))
 
-## --- IMPORTER un YAML 
+## --- IMPORT A YAML 
 
 st.sidebar.divider()
-st.sidebar.subheader("📥 Importer un nouveau fichier")
+st.sidebar.subheader(_("📥 Import new file"))
 #st.sidebar.caption(f"(Fichier en cours : `{st.session_state['shared_fn']}`)")
 
 uploaded_file = st.sidebar.file_uploader(
-    "Choisir un fichier", 
+    _("Choose file"), 
     type=["yaml", "yml"],
-    help="Charge le contenu d'un fichier YAML dans l'éditeur"
+    help=_("Loads the contents of a YAML file into the editor")
 )
 
 if uploaded_file is not None:
     #if st.sidebar.button("🚀 Charger ce fichier", use_container_width=True):
     if uploaded_file.name != st.session_state.last_uploaded_file:
         try:
-            # 1. Lecture du contenu du fichier uploadé
-            # On utilise l'instance 'yaml' (ruamel) déjà configurée
             data = yaml.load(uploaded_file)
+            data = convert_quiz_data_v1_to_v2(data) #precaution
             
-            # 2. Mise à jour du session_state
+            # 2. updatesession_state
             st.session_state.data = data
-            st.session_state.data['title'] = data.get('title', 'Entrer un titre ici')
+            st.session_state.data['title'] = data.get('title', _('📖 Enter a title here'))
             st.session_state["quiz_title"] = st.session_state.data["title"]
 
-            # 3. Mise à jour du nom de fichier pour les futures sauvegardes
+            # 3. Updating filename for future save
             
             st.session_state["shared_fn"] = uploaded_file.name
             st.session_state.last_uploaded_file = uploaded_file.name
 
-            # 4. Message de succès et rafraîchissement
-            st.toast(f"Fichier `{st.session_state['shared_fn']}` chargé avec succès !")
+            # 4. Success message and refresh
+            st.toast(_("File `{file_name}` loaded successfully!").format(file_name=st.session_state['shared_fn']))
             st.rerun()
             
         except Exception as e:
-            st.sidebar.error(f"Erreur de lecture : {e}")
+            st.sidebar.error(_("Read Error:") + f"{e}")
 
-## -- CHOIX D'UNE QUESTION
+## -- CHOICE OF A QUESTION
 st.sidebar.divider()
-st.sidebar.subheader("🎰🎲♠ Gestion des quizzes")
+st.sidebar.subheader(_("🎰🎲♠ Quiz management"))
 
 quiz_ids = [k for k in data.keys() if k != 'title']
-# ------- ajout des catégories -------
 
-# 3. Widget de filtrage dans la sidebar
+# ------- adding categories -------
+
+# 3. Filtering widget in sidebar
 
 # -----
-# --- Dans la sidebar, calcul des compteurs ---
+# --- In the sidebar, calculation of counters ---
 quiz_ids_all = [k for k in data.keys() if k != 'title']
 
-# Filtre Catégorie (utilise sorted_cats préparé plus haut)
-cat_options = [f"Toutes ({len(quiz_ids_all)})"] + [f"{c} ({cat_counts[c]})" for c in sorted_cats]
-selected_cat_ui = st.sidebar.selectbox("Catégorie", cat_options)
-selected_cat = selected_cat_ui.split(" (")[0] if selected_cat_ui != "Toutes" else "Toutes"
+# Category filter (uses sorted_cats)
+cat_options = [_("All ({len_all})").format(len_all=len(quiz_ids_all))] + [f"{c} ({cat_counts[c]})" for c in sorted_cats]
+selected_cat_ui = st.sidebar.selectbox(_("Category"), cat_options)
+all_cat_name =  _("All ({len_all})").split(" (")[0] #
+selected_cat = selected_cat_ui.split(" (")[0] if selected_cat_ui != all_cat_name else all_cat_name
 
 # Filtre Tags (utilise sorted_tags préparé plus haut)
-selected_tags = st.sidebar.multiselect("Filtrer par Tags", 
-                            placeholder="Choisir un tag", options=sorted_tags)
+selected_tags = st.sidebar.multiselect(_("Filter by Tags"), 
+                            placeholder=_("Choose a tag"), options=sorted_tags)
 
-# 4. Logique de Filtrage Conjoint
+# 4. Join filtering
 filtered_ids = []
+
 for qid in quiz_ids_all:
-    q_cat = data[qid].get('category', 'Aucune')
+    q_cat = data[qid].get('category', _('None'))
     q_tags = data[qid].get('tags', [])
     
-    # Vérification catégorie
-    match_cat = (selected_cat == "Toutes" or q_cat == selected_cat)
-    # Vérification tags (la question doit contenir TOUS les tags sélectionnés)
+    # Category check
+    match_cat = (selected_cat == all_cat_name or q_cat == selected_cat)
+    # Tag verification (the question must contain ALL selected tags)
     match_tags = all(tag in q_tags for tag in selected_tags)
-    
+ 
     if match_cat and match_tags:
         filtered_ids.append(qid)
 
-# 5. Affichage du résultat final dans la navigation
+# 5. Displaying final result in navigation
 #st.sidebar.divider()
 #st.sidebar.subheader(f"Résultats ({len(filtered_ids)})")
 
@@ -570,29 +610,28 @@ quiz_ids = filtered_ids
 # -----
 
 
-
-# Position de la question actuelle dans la liste
+# Position of current question in list
 idx = filtered_ids.index(st.session_state.current_quiz) if st.session_state.current_quiz in filtered_ids else 0
 
 selected_quiz = st.sidebar.selectbox(
-    f"Choisir une question parmi {len(filtered_ids)}", 
+    _("Choose a question from {lenf}").format(lenf=len(filtered_ids)), 
     quiz_ids, 
     index=quiz_ids.index(st.session_state.current_quiz) if st.session_state.current_quiz in quiz_ids else 0
     )
-# On met à jour la session SEULEMENT si l'utilisateur a cliqué sur le menu
+# The session is updated ONLY if the user has clicked on the menu
 if selected_quiz != st.session_state.current_quiz:
     st.session_state.current_quiz = selected_quiz
     st.rerun()
 # -------------------------------------
 
 
-# --- ACTIONS SUR LE QUIZ SÉLECTIONNÉ ---
+# --- ACTIONS ON SELECTED QUIZ ---
 
 col1, col2 = st.sidebar.columns(2)
 
 with col1:
     # 1. BOUTON CLONER
-    if st.button("👯 Dupliquer", use_container_width=True, help="Copier ce quiz"):
+    if st.button(_("👯 Duplicate"), use_container_width=True, help="Copier ce quiz"):
         import copy
         numbers = [int(re.findall(r'\d+', k)[0]) for k in quiz_ids if re.findall(r'\d+', k)]
         next_num = max(numbers) + 1 if numbers else 1
@@ -602,19 +641,18 @@ with col1:
         st.rerun()
 
 with col2:
-    # 2. BOUTON SUPPRIMER AVEC CONFIRMATION
-    # On utilise le session_state pour mémoriser si on a cliqué une première fois
+    # 2. DELETE BUTTON WITH CONFIRMATION
     confirm_key = f"confirm_del_{selected_quiz}"
     if confirm_key not in st.session_state:
         st.session_state[confirm_key] = False
 
     if not st.session_state[confirm_key]:
-        if st.button("🗑️ Supprimer", use_container_width=True, help="Supprimer ce quiz"):
+        if st.button(_("🗑️ Delete"), use_container_width=True, help="Supprimer ce quiz"):
             st.session_state[confirm_key] = True
             st.rerun()
     else:
-        # Deuxième état : demande de confirmation
-        if st.button("❗ Confirmer ?", use_container_width=True, type="primary"):
+        # Confirmation request
+        if st.button(_("❗ Confirm?"), use_container_width=True, type="primary"):
             if len(quiz_ids) > 1:
                 del st.session_state.data[selected_quiz]
                 remaining_ids = [k for k in st.session_state.data.keys() if k != 'title']
@@ -622,61 +660,121 @@ with col2:
                 st.session_state[confirm_key] = False
                 st.rerun()
             else:
-                st.sidebar.error("Dernier quiz !")
+                st.sidebar.error(_("Last quiz!"))
                 st.session_state[confirm_key] = False
-        # Bouton pour annuler
-        if st.button("Annuler", use_container_width=True):
+        # Cancel button
+        if st.button(_("Cancel"), use_container_width=True):
             st.session_state[confirm_key] = False
             st.rerun()
 
 
-# 4. BOUTON NOUVEAU
-if st.sidebar.button("➕ Nouveau Quiz", use_container_width=True):
+# 4. BUTTON NEW QUIZ
+OldNewQuiz = '''if st.sidebar.button(_("➕ New Quiz"), use_container_width=True):
     numbers = [int(re.findall(r'\d+', k)[0]) for k in quiz_ids if re.findall(r'\d+', k)]
     next_num = max(numbers) + 1 if numbers else 1
     new_id = f"quiz{next_num}"
     st.session_state.data[new_id] = {
-        "type": "qcm",
-        "question": "Nouvelle question",
-        "propositions": [{"proposition": "Choix 1", "expected": False}]
+        "type": "numeric",
+        "question": _("New question"),
+        "propositions": [{"proposition": _("Choice 1"), "expected": 3.14}]
     }
     st.session_state.current_quiz = new_id
-    st.rerun()
+    st.rerun()'''
+
+# NEW NEW QUIZ
+
+# Available quiz types
+available_types = ["mcq", "numeric", "mcq-template", "numeric-template"]
+
+# Popover replaces the previous "New Quiz" button + state flag
+with st.sidebar.popover(_("➕ New Quiz"), use_container_width=True):
+
+    selected_type = st.selectbox(
+        _("Select quiz type"),
+        available_types,
+        help=_("Defines the validation behavior of the quiz.")
+    )
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        if st.button(_("Create"), use_container_width=True):
+
+            # Compute next quiz ID
+            numbers = [
+                int(re.findall(r'\d+', k)[0])
+                for k in quiz_ids
+                if re.findall(r'\d+', k)
+            ]
+            next_num = max(numbers) + 1 if numbers else 1
+            new_id = f"quiz{next_num}"
+
+            # Create quiz structure depending on selected type
+            if selected_type in ["numeric", "numeric-template"]:
+                expval = 3.14 if selected_type == "numeric" else "f'{a+b:.4f}'"
+                new_data = {
+                    "type": selected_type,
+                    "question": _("New question"),
+                    "propositions": [
+                        {"proposition": _("Choice 1"), "expected": expval}
+                    ]
+                }
+
+            elif selected_type in ["mcq", "mcq-template"]:
+                expval = False if selected_type == "mcq" else "f'{a} in {b}'"
+                new_data = {
+                    "type": selected_type,
+                    "question": _("New question"),
+                    "propositions": [
+                        {"proposition": _("Choice 1"), "expected": expval}
+                    ]
+                }
+
+            # Store quiz and update current selection
+            st.session_state.data[new_id] = new_data
+            st.session_state.current_quiz = new_id
+
+            st.rerun()
+
+    with col2:
+        st.write("")  # Optional spacer (keeps layout symmetrical)
+
+# END NEW NEW QUIZ
 
 
 #st.sidebar.divider()
 
 
-# --- SECTION EXPORT (Nouvelle version)---
+# --- EXPORT SECTION (New version)---
 st.sidebar.divider()
-st.sidebar.title("📤 Exportation")
+st.sidebar.title(_("📤 Export"))
 
-# Initialisation du dictionnaire de sélection
+# Initialization of the selection dictionary
 if 'selected_for_export' not in st.session_state:
     st.session_state.selected_for_export = {qid: False for qid in quiz_ids}
 
-# 1. BOUTONS TOUT COCHER / DÉCOCHER
+# 1. CHECK/UNCHECK ALL BUTTONS
 col_all1, col_all2 = st.sidebar.columns(2)
-if col_all1.button("✅ Tout cocher", use_container_width=True):
+if col_all1.button(_("✅ Select all"), use_container_width=True):
     for qid in quiz_ids:
         st.session_state.selected_for_export[qid] = True
-        # On force la mise à jour des clés des widgets
+        # Force updating of widget keys
         st.session_state[f"check_side_{qid}"] = True
         st.session_state[f"check_main_{qid}"] = True
     st.rerun()
 
-if col_all2.button("❌ Tout décocher", use_container_width=True):
+if col_all2.button(_("❌ Deselect all"), use_container_width=True):
     for qid in quiz_ids:
         st.session_state.selected_for_export[qid] = False
         st.session_state[f"check_side_{qid}"] = False
         st.session_state[f"check_main_{qid}"] = False
     st.rerun()
 
-# 2. ZONE DE SÉLECTION (Cases à cocher)
-with st.sidebar.expander("Sélectionner les questions", expanded=False):
+# 2. SELECTION AREA (Checkboxes)
+with st.sidebar.expander(_("Select questions"), expanded=False):
     for qid in quiz_ids:
         side_key = f"check_side_{qid}"
-        # On s'assure que la clé du widget existe et est alignée sur le dictionnaire
+        # We ensure that the widget key exists 
         if side_key not in st.session_state:
             st.session_state[side_key] = st.session_state.selected_for_export.get(qid, False)
 
@@ -688,31 +786,31 @@ with st.sidebar.expander("Sélectionner les questions", expanded=False):
         )
         
 
-# 2. Menu de choix du format
+# 2. Format choice menu
 selected_qids = [qid for qid in quiz_ids if st.session_state.selected_for_export.get(qid, False)]
 
 if selected_qids:
-    st.sidebar.markdown(f"**{len(selected_qids)} question(s) sélectionnée(s)**")
+    st.sidebar.markdown(_("**{lsq} question(s) selected**").format(lsq=len(selected_qids)))
     
-    # Préparation de l'export_data réindexé 
+    # Preparing the export_data
     export_data = {"title": data.get('title', 'Sans titre')}
     for i, old_id in enumerate(selected_qids):
         export_data[f"quiz{i+1}"] = copy.deepcopy(data[old_id])
 
-    # Le menu déroulant d'export
+    # Export drop-down menu
     export_format = st.sidebar.selectbox(
-        "Choisir le format d'export",
-        ["---", "Extrait (YAML)", "Interactif (Entraînement)", "Examen (Serveur)", "AMC (LaTeX)"]
+        _("Choose export format"),
+        ["---", _("Extract (YAML)"), _("Interactive (self-assessment)"), _("Exam (Server)"), "AMC (LaTeX)"]
     )
 
     if export_format != "---":
-        if st.sidebar.button("Configurer & Exporter", use_container_width=True):
+        if st.sidebar.button(_("Configure & Export"), use_container_width=True):
             export_config_dialog(selected_qids, export_format)
             
 
 
 else:
-    st.sidebar.info("Cochez des questions pour exporter.")
+    st.sidebar.info(_("Check questions to export."))
 
 
 
@@ -726,14 +824,13 @@ data['title'] = st.sidebar.text_input(
 )
 """
 
-# --- ZONE PRINCIPALE ---
+# --- PRINCIPAL AREA ---
 #st.title(f"📖 {data.get('title', 'Quiz sans titre')}")
 #st.subheader(f"📖 {data.get('title', 'Quiz sans titre')}")
 with st.container():
     st.markdown(
         """
         <style>
-        /* Premier widget dans un container */
         .block-container > div:first-child {
             margin-top: 1.0rem !important;
             padding-top: 1.0rem !important;
@@ -744,26 +841,25 @@ with st.container():
     )
 
     title = st.text_input(
-        "Titre du document", 
+        _("Document Title"), 
         #value=f"📖 {st.session_state.data.get('title', 'Quiz sans titre')}",
         key="quiz_title",
-        help="Le titre principal du fichier YAML (clé 'title') - Modifiable ici.",
+        help=_("The main title of the YAML file (key ‘title’) - Editable here."),
         #label_visibility="collapsed",
     )
-
 data["title"] = title.lstrip("📖 ").strip()
 st.session_state.data["title"] = title.lstrip("📖 ").strip()
-st.caption(f"Fichier en cours : `{st.session_state['shared_fn']}`")
+#st.session_state["quiz_title"] = st.session_state.data["title"]
+st.caption(_("Current file: `{shared_fn}`").format(shared_fn=st.session_state['shared_fn']))
 col_save1, col_save2 = st.columns([6, 4])
 
 with col_save1:
-    # Champ texte central
 
     st.text_input(
-    "Modifiez pour 'Enregistrer sous'.", 
+    _("Edit to ‘Save As’."), 
     key="fn_main", 
     on_change=update_from_main,
-    help="'Enregistrer sous'."
+    help=_("‘Save As’.")
     )
 
 
@@ -779,21 +875,21 @@ with col_save2:
     btn_save, btn_download = st.columns([1, 1], gap="small")
 
     with btn_save:
-        if st.button("💾 Enregistrer", key="btn_main_save_final",width="stretch"):
+        if st.button(_("💾 Save"), key="btn_main_save_final",width="stretch"):
             fname = st.session_state.get("fn_main") or st.session_state["shared_fn"]
             st.session_state.output_content = build_yaml(fname)
-            st.toast("YAML nettoyé et enregistré✔️")
+            st.toast(_("YAML cleaned and saved ✔️"))
 
     with btn_download:
         if st.session_state.output_content is not None:
             fname = st.session_state.get("fn_main") or st.session_state["shared_fn"]
             st.download_button(
-                label=" Télécharger !",
+                label=_("Download!"),
                 data=st.session_state.output_content,
                 file_name=fname,
                 mime="text/yaml",
                 width="stretch",
-                help="Uniquement APRÈS avoir enregistré le YAML"
+                help=_("Only AFTER saving the YAML")
             )
 
 
@@ -804,12 +900,12 @@ if st.session_state.current_quiz:
     st.divider()
     #st.subheader(f"Édition de : {q_id}")
 
-## avec flèches avant/après
+## with arrows before/after
 if st.session_state.current_quiz and filtered_ids:
     current_idx = filtered_ids.index(st.session_state.current_quiz)
     
-    # On crée 4 colonnes : [Bouton Prev, Titre, Bouton Next, Checkbox]
-    # Les ratios [0.5, 4, 0.5, 1.5] permettent de garder les boutons petits et le titre large
+    # We create 4 columns: [Prev Button, Title, Next Button, Checkbox] 
+    # The ratios [0.5, 4, 0.5, 1.5] keep the buttons small and the title wide
     col_prev, col_title, col_next, col_check = st.columns([0.5, 3, 0.5, 1.5], vertical_alignment="center")
 
     with col_prev:
@@ -821,140 +917,149 @@ if st.session_state.current_quiz and filtered_ids:
         if st.button("➡️", disabled=(current_idx == len(filtered_ids) - 1)):
             st.session_state.current_quiz = filtered_ids[current_idx + 1]
             st.rerun()
+    def get_new_quiz_title():
+        st.session_state.current_quiz = st.session_state.current_quiz_edit.split()[-1]
 
     with col_title:
-        st.subheader(f"Édition de {st.session_state.current_quiz}")
+        temp = '''st.session_state.current_quiz_edit = _("Editing {current_quiz}").format(current_quiz=st.session_state.current_quiz)
+        edit_current_quiz = st.text_input(
+        _("Editing {current_quiz}").format(current_quiz=st.session_state.current_quiz), 
+        #value=f"📖 {st.session_state.data.get('title', 'Quiz sans titre')}",
+        key="current_quiz_edit",
+        help=_("The main title of the YAML file (key ‘title’) - Editable here."),
+        on_change=get_new_quiz_title,
+        #label_visibility="collapsed",
+        )'''
+        st.subheader(_("Editing {current_quiz}").format(current_quiz=st.session_state.current_quiz))
 
 
     with col_check:
         main_key = f"check_main_{st.session_state.current_quiz}"
-        # On s'assure que l'état est bien initialisé
+        # We ensure that the state is correctly initialized
         st.session_state[main_key] = st.session_state.selected_for_export.get(st.session_state.current_quiz, False)
 
         st.checkbox(
-            "Exporter", 
+            _("Export"), 
             key=main_key,
             on_change=sync_export,
             args=(st.session_state.current_quiz, main_key),
-            help="Cocher pour inclure cette question dans le futur export YAML"
+            help=_("Check to include this question in future YAML exports")
         )
     
    # st.divider()
-## fin avec  flèches avant/après
+## end of before/after arrows
 
-#fin ajout synchro export
+#end add sync export
 
-# ----- ajout catégories -----
+# ----- Add categories -----
 
 #    st.subheader(f"Édition de {st.session_state.current_quiz}")
     
-    # Champ Catégorie avec suggestion des catégories existantes
-    # On utilise un text_input pour permettre l'ajout de nouvelles catégories
-   # Préparation des catégories existantes (formatage propre)
+    # Category field with suggestion of existing categories
+    # We use a text_input to allow the addition of new categories
+   # Preparation of existing categories 
 # One more
-# Options du menu : Aucune, les existantes, et l'option de création
-    current_cat = q_data.get('category', 'Aucune')
-    all_cats = sorted(list(set(data[qid].get('category', 'Aucune') for qid in quiz_ids_all if data[qid].get('category', 'Aucune') != "Aucune")))
-    menu_options = ["Aucune"] + all_cats + ["➕ Nouvelle catégorie..."]
+# Menu options: None, existing, and create option
+    current_cat = q_data.get('category', _('None'))
+    all_cats = sorted(list(set(data[qid].get('category', _('None')) for qid in quiz_ids_all if data[qid].get('category', _('None')) != _("None"))))
+    menu_options = [_("None")] + all_cats + [_("➕ New category...")]
     
-    # On définit l'index par défaut
+    # We define a default index
     default_idx = menu_options.index(current_cat) if current_cat in menu_options else 0
 
-    # 2. Mise en page
+    # 2. Page layout
     col_cat1, col_cat2 = st.columns([4,6])
     
     with col_cat1:
         selected_from_menu = st.selectbox(
-            "🗂️ Catégorie",
+            _("🗂️ Category"),
             options=menu_options,
             index=default_idx,
             key=f"select_cat_{st.session_state.current_quiz}",
-            help="Catégorie de la question",
+            help=_("Question category"),
         )
 
         # Si l'utilisateur veut créer une nouvelle catégorie
-        if selected_from_menu == "➕ Nouvelle catégorie...":
+        if selected_from_menu == _("➕ New category..."):
             new_cat_name = st.text_input(
-                "Nom de la nouvelle catégorie",
-                placeholder="Saisissez le nom ici...",
+                _("Name of the new category"),
+                placeholder=_("Enter the name here..."),
                 key=f"new_cat_input_{st.session_state.current_quiz}",
-                help="Tapez pour ajouter la catégorie",
+                help=_("Type to add the categor"),
             )
-            if new_cat_name: # Dès qu'il y a un nom, on l'applique
+            if new_cat_name: 
                 if new_cat_name != current_cat:
                     q_data['category'] = new_cat_name
                     st.rerun()
         else:
-            # Si on change pour une catégorie existante ou "Aucune"
             if selected_from_menu != current_cat:
                 q_data['category'] = selected_from_menu
                 st.rerun()
 
-    # fin one more
+    # end one more
     with col_cat2:
         current_tags = q_data.get('tags', [])
 
         widget_key = f"tags_widget_{st.session_state.current_quiz}"
         state_key  = f"tags_state_{st.session_state.current_quiz}"
 
-        # Init du state métier
+        # Init 
         if state_key not in st.session_state:
             st.session_state[state_key] = current_tags.copy()
 
-        # ⚠️ IMPORTANT : inclure les tags existants + sélectionnés
+        # ⚠️ IMPORTANT: include existing + selected tags
         all_tags = sorted(set(sorted_tags) | set(st.session_state[state_key]))
 
         updated_tags = st.multiselect(
-            "🏷️ Tags (Difficulté, Thème secondaire...)",
+            _("🏷️ Tags (Difficulty, Sub-theme...)"),
             options=all_tags,
-            default=st.session_state[state_key],   # ← autorisé (pas la clé widget)
+            default=st.session_state[state_key],   
             accept_new_options=True,
-            placeholder="Choisir ou entrer un nouveau tag",
+            placeholder=_("Choose or enter a new tag"),
             key=widget_key
         )
 
-        # ⬇️ logique métier (clé NON widget)
         if updated_tags != st.session_state[state_key]:
             st.session_state[state_key] = updated_tags
             q_data["tags"] = updated_tags
 
 
-    # ----- fin ajout catégories -----
+    # ----- end adding categories -----
 
-    # Fin ajout tags --------------------
+    # End adding tags --------------------
 
-    # 1. Question et Type
+    # 1. Question and Type
     col_q1, col_q2 = st.columns([4, 1])
 
     with col_q1:
         q_data['question'] = st.text_area(
-            "Texte de la question", 
+            _("Question text"), 
             q_data.get('question', ''), 
             height=80,
-            help="Supporte le Markdown et le LaTeX (ex: $x^2$)."
+            help=_("Supports Markdown and LaTeX (e.g., $x^2$).")
         )
         render_preview("Question", q_data['question'])
 
-    types_dispo = ["qcm", "numeric", "qcm-template", "numeric-template"]
-    current_type = q_data.get('type', 'qcm')
+    types_dispo = ["mcq", "numeric", "mcq-template", "numeric-template"]
+    current_type = q_data.get('type', 'mcq')
     with col_q2:
         with st.container(border=True):
             q_data['type'] = st.selectbox(
                 "Type", 
                 types_dispo, 
                 index=types_dispo.index(current_type) if current_type in types_dispo else 0,
-                help="Définit le comportement de validation du quiz."
+                help=_("Defines the validation behavior of the quiz.")
             )
 
-            q_data['label'] =  st.text_input("Label", 
+            q_data['label'] =  st.text_input(_("Label"), 
                                 value=q_data.get('label', f'q:{q_id}'), 
-                                help="Label de la question.")
+                                help=_("Question label."))
 
-    # 2. CONTRAINTES
-    with st.expander("🔗 Contraintes logiques (XOR, IMPLY...)", expanded=False):
+    # 2. CONSTRAINTS
+    with st.expander(_("🔗 Logical constraints (XOR, IMPLY...)"), expanded=False):
         if 'constraints' not in q_data: q_data['constraints'] = []
         
-        # Récupération des labels pour le multiselect
+        # Retrieving labels for multiselect
         available_labels = [p.get('label', f'p{i}') for i, p in enumerate(q_data.get('propositions', []))]
         constraints_types = ["XOR", "SAME", "IMPLY", "IMPLYFALSE"]
         
@@ -966,87 +1071,89 @@ if st.session_state.current_quiz and filtered_ids:
             c['malus'] = cc3.number_input("Malus", value=int(c.get('malus', 1)), key=f"cm_{q_id}_{idx}")
             
             cc4.markdown("<div style='padding-top: 28px;'></div>", unsafe_allow_html=True)
-            if cc4.button("🗑️", key=f"cdel_{q_id}_{idx}", help="Supprimer cette contrainte"):
+            if cc4.button("🗑️", key=f"cdel_{q_id}_{idx}", help=_("Remove this constraint")):
                 q_data['constraints'].pop(idx)
                 st.rerun()
         
-        if st.button("➕ Ajouter une contrainte"):
+        if st.button(_("➕ Add constraint")):
             q_data['constraints'].append({"indices": [], "type": "XOR", "malus": 1})
             st.rerun()
 
     # 3. PROPOSITIONS
     st.write("---")
-    st.subheader("Propositions")
+    st.subheader(_("Propositions"))
     if 'propositions' not in q_data: q_data['propositions'] = []
     
     for i, p in enumerate(q_data['propositions']):
         with st.expander(f"Proposition {i+1} : {p.get('label', '...')}", expanded=True):
             # Ligne 1 : Label et Correct/Expected
-            c1, _, c3 = st.columns([2, 2, 1])
-            p['label'] = c1.text_input("Label", p.get('label', ''), key=f"l_{q_id}_{i}", help="Identifiant court pour les contraintes.")
+            c1, c2, c3 = st.columns([2, 2, 1])
+            p['label'] = c1.text_input(_("Label"), p.get('label', ''), key=f"l_{q_id}_{i}", help=_("Short identifier for the proposition."))
             
-            exp_val = p.get('expected', False)
-            if isinstance(exp_val, bool) or str(exp_val).lower() in ['true', 'false']:
+            if q_data['type'] in ['mcq']:
+                exp_val = p.get('expected', False)
+            #if isinstance(exp_val, bool) or str(exp_val).lower() in ['true', 'false']:
                 c3.markdown("<div style='padding-top: 35px;'></div>", unsafe_allow_html=True)
-                p['expected'] = c3.checkbox("Correct ?", value=(str(exp_val).lower() == 'true'), key=f"e_{q_id}_{i}")
-            else:
-                # VALIDATION DE LA FORMULE ICI
-                # On utilise on_change pour déclencher le script dès que le champ est modifié
+                p['expected'] = c3.checkbox(_("Correct?"), value=(str(exp_val).lower() == 'true'), key=f"e_{q_id}_{i}")
+            else:   # Here we are in numeric or qcm-template, thus we display a text-input
+                # We use on_change to trigger the script as soon as the field is modified
+                exp_val = p.get('expected', 3.14)
                 new_val = c3.text_input(
-                    "Valeur attendue", 
+                    _("Expected value"), 
                     value=str(exp_val), 
                     key=f"e_{q_id}_{i}",
-                    on_change=trigger_rerun  # <--- FORCE LA MISE À JOUR
+                    on_change=trigger_rerun  # <---FORCE THE UPDATE
                 )
 
-                # On valide New_val DIRECTEMENT
+                # Direct validation of New_val
                 val_error = validate_fstring(new_val)
 
                 if val_error:
                     st.error(val_error)
-                    # Optionnel : On peut empêcher la mise à jour des données si erreur
-                    # p['expected'] = exp_val 
                 else:
                     p['expected'] = new_val
 
-            p['proposition'] = st.text_area("Texte", p.get('proposition', ''), key=f"p_{q_id}_{i}", height=68)
-            render_preview("Proposition", p['proposition'])
+            p['proposition'] = st.text_area(_("Text"), p.get('proposition', ''), key=f"p_{q_id}_{i}", height=68)
+            render_preview(_("Proposition"), p['proposition'])
 
-            p['reponse'] = st.text_area("Explication (reponse)", p.get('reponse', ''), key=f"r_{q_id}_{i}", height=68, help="Message affiché après la validation.")
-            p['tip'] = st.text_area("Indice (tip)", p.get('tip', ''), key=f"t_{q_id}_{i}", height=68, help="Indice optionnel.")
+            p['answer'] = st.text_area(_("Explanation (answer)"), p.get('answer', ''), key=f"r_{q_id}_{i}", height=68, help=_("Message displayed after validation."))
+            p['tip'] = st.text_area(_("Hint (tip)"), p.get('tip', ''), key=f"t_{q_id}_{i}", height=68, help=_("Optional hint."))
 
-            # Ligne 5 : Points et Suppression
+            # 
             cb1, cb2, cb3 = st.columns([2, 2, 1])
-            res_b = cb1.text_input("Bonus", str(p.get('bonus', '')), key=f"b_{q_id}_{i}", help="Points ajoutés (vide = 1).")
-            res_m = cb2.text_input("Malus", str(p.get('malus', '')), key=f"m_{q_id}_{i}", help="Points retirés (vide = 0).")
+            res_b = cb1.text_input(_("Bonus"), str(p.get('bonus', '')), key=f"b_{q_id}_{i}", help=_("Points added (default = 1)."))
+            res_m = cb2.text_input(_("Penalty"), str(p.get('malus', '')), key=f"m_{q_id}_{i}", help=_("Points deducted (default = 0)."))
             
-
-            # --- ESPACE BOUTONS (Supprimer + Dupliquer) ---
+            if q_data['type'] in ['numeric', 'numeric-template']:
+                res_tol = cb1.text_input(_("Tolerance %"), str(p.get('tolerance', '')), key=f"tp_{q_id}_{i}", help=_("Tolerance in % (default = 0)."))
+                res_tolm = cb2.text_input(_("Tolerance Abs"), str(p.get('tolerance_abs', '')), key=f"ta_{q_id}_{i}", help=_("Tolerance in absolute value (default = 0.01)."))
+            
+            # --- BUTTONS SPACE (Delete + Duplicate) ---
             with cb3:
-                # On remonte un peu le premier bouton avec un padding négatif si besoin
+                # We move the first button up a little 
                 st.markdown("<div style='padding-top: 28px;'></div>", unsafe_allow_html=True)
                 
-                if st.button("🗑️ Supprimer", key=f"del_{q_id}_{i}", use_container_width=True):
+                if st.button(_("🗑️ Delete"), key=f"del_{q_id}_{i}", use_container_width=True):
                     q_data['propositions'].pop(i)
                     st.rerun()
 
-                # Bouton Dupliquer juste en dessous, sans espace supplémentaire
-                if st.button("👯 Dupliquer", key=f"dup_prop_{q_id}_{i}", use_container_width=True):
+                # Duplicate button just below, with no extra space
+                if st.button(_("👯 Duplicate"), key=f"dup_prop_{q_id}_{i}", use_container_width=True):
                     import copy
                     new_prop = copy.deepcopy(p)
-                    new_prop['label'] = f"{p.get('label', '')} copie"
+                    new_prop['label'] = f"{p.get('label', '')} " + _("copy") 
                     q_data['propositions'].insert(i + 1, new_prop)
                     st.rerun()
 
-            # Nettoyage des clés Bonus/Malus pour le YAML
+            # Cleaning Bonus/Malus keys for YAML
             if res_b.strip(): p['bonus'] = int(res_b) if res_b.lstrip('-').isdigit() else res_b
             elif 'bonus' in p: del p['bonus']
             if res_m.strip(): p['malus'] = int(res_m) if res_m.lstrip('-').isdigit() else res_m
             elif 'malus' in p: del p['malus']
 
-    if st.button("➕ Ajouter une proposition"):
+    if st.button(_("➕ Add a proposal")):
         q_data['propositions'].append({"label": f"p{len(q_data['propositions'])+1}", "proposition": "", "expected": False})
         st.rerun()
 
 else:
-    st.info("Utilisez la barre latérale pour naviguer ou créer un nouveau quiz.")
+    st.info(_("Use the sidebar to navigate or create a new quiz."))
