@@ -13,6 +13,7 @@ def convert_quiz_data_v1_to_v2(data):
 
     # Conversion logic: v1 -> v2
     for quiz_id, entry in new_data.items():
+        if quiz_id == "title": continue
         propositions = entry.get("propositions") or []
         quiz_type = entry.get("type", "mcq")
         
@@ -65,6 +66,7 @@ def convert_quiz_v1_to_v2(input_path: str, output_path: str = None, skip_backup:
 
     # Conversion logic: v1 -> v2
     for quiz_id, entry in quiz_bank.items():
+        if quiz_id == "title": continue
         propositions = entry.get("propositions") or []
         quiz_type = entry.get("type", "mcq")
         
