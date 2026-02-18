@@ -1,0 +1,461 @@
+# English translations for PACKAGE package.
+# Copyright (C) 2026 THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# Jean-François BERCHER <jf.bercher@esiee.fr>, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-02-13 22:05+0100\n"
+"PO-Revision-Date: 2026-02-13 22:41+0100\n"
+"Last-Translator: Jean-François BERCHER <jf.bercher@esiee.fr>\n"
+"Language-Team: English\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: quiz_editor.py:47
+msgid "⚠️ Accolade non fermée"
+msgstr "⚠️ Unclosed brace"
+
+#: quiz_editor.py:79
+#, python-brace-format
+msgid "Aperçu du rendu ({label}) :</div>"
+msgstr "Render preview ({label}) :</div>"
+
+#: quiz_editor.py:92
+msgid "Le nom du fichier ne peut pas être vide."
+msgstr "The file name cannot be empty."
+
+#: quiz_editor.py:105
+#, python-brace-format
+msgid "Fichier enregistré proprement sous `{filename}`"
+msgstr "File saved successfully as `{filename}`"
+
+#: quiz_editor.py:173
+msgid "Nouveau Quiz"
+msgstr "New Quiz"
+
+#: quiz_editor.py:184
+msgid "Entrez un titre ici"
+msgstr "Enter a title here"
+
+#: quiz_editor.py:197 quiz_editor.py:206
+msgid "Aucune"
+msgstr "None"
+
+#: quiz_editor.py:220
+#, python-brace-format
+msgid "Éditeur YAML - {FILE_PATH}"
+msgstr "YAML Editor - {FILE_PATH}"
+
+#: quiz_editor.py:310 quiz_editor.py:738
+msgid "Titre du document"
+msgstr "Document Title"
+
+#: quiz_editor.py:349
+msgid ""
+"⚠️ Fichier encrypté avec mot de passe. Assurez vous d'utiliser l'option "
+"`mandatoryInternet=True` à l'initiatlisation du quiz"
+msgstr ""
+"⚠️ File encrypted with password. Be sure to use the `mandatoryInternet=True` "
+"option when initializing the quiz"
+
+#: quiz_editor.py:361
+msgid "mon_quiz"
+msgstr "my_quiz"
+
+#: quiz_editor.py:362
+msgid "Nom du fichier (sans extension)"
+msgstr "File name (without extension)"
+
+#: quiz_editor.py:363
+msgid "Réindexer les labels de questions"
+msgstr "Reindex question labels"
+
+#: quiz_editor.py:364
+msgid "Réindexe pour assurer la continuité des labels, eg: quiz1, quiz2, etc"
+msgstr "Reindex to ensure continuity of labels, e.g.: quiz1, quiz2, etc."
+
+#: quiz_editor.py:366
+msgid "Sans titre"
+msgstr "Untitled"
+
+#: quiz_editor.py:381 quiz_editor.py:434 quiz_editor.py:697
+msgid "Extrait (YAML)"
+msgstr "Extract (YAML)"
+
+#: quiz_editor.py:382 quiz_editor.py:384
+msgid "YAML crypté"
+msgstr "Encrypted YAML"
+
+#: quiz_editor.py:382 quiz_editor.py:386
+msgid "YAML encodé"
+msgstr "Encoded YAML"
+
+#: quiz_editor.py:382
+msgid "YAML sans encodage"
+msgstr "Unencoded YAML"
+
+#: quiz_editor.py:393
+msgid "Mot de passe"
+msgstr "Password"
+
+#: quiz_editor.py:393
+msgid "💡 Ce pwd participe à l'encryption"
+msgstr "💡 This pwd participates in encryption"
+
+#: quiz_editor.py:403
+msgid ""
+"💡 Ce mode permet de sauvegarder tout ou partie des questions en un nouveau "
+"fichier, "
+msgstr ""
+"💡 This mode allows you to save all or part of the questions in a new file, "
+
+#: quiz_editor.py:404
+msgid "avec encryptage optionnel. "
+msgstr "with optional encryption."
+
+#: quiz_editor.py:406 quiz_editor.py:697
+msgid "Interactive (self-assessment)"
+msgstr "Interactive (self-assessment)"
+
+#: quiz_editor.py:411
+msgid "💡 Ce mode permet l'autocorrection immédiate pour les élèves."
+msgstr "💡 This mode allows immediate self-correction for students."
+
+#: quiz_editor.py:413 quiz_editor.py:697
+msgid "Examen (Serveur)"
+msgstr "Exam (Server)"
+
+#: quiz_editor.py:414
+msgid "URL du serveur de réception"
+msgstr "Receiving server URL"
+
+#: quiz_editor.py:421
+msgid "Veuillez saisir l'URL du serveur pour continuer."
+msgstr "Please enter the server URL to continue."
+
+#: quiz_editor.py:424
+msgid "Points négatifs (malus -1)"
+msgstr "Negative points (-1 malus)"
+
+#: quiz_editor.py:429
+msgid "💡 Extraction au format LaTeX-AMC."
+msgstr "💡 Extraction in LaTeX-AMC format."
+
+#: quiz_editor.py:436
+#, python-brace-format
+msgid "⬇️ Télécharger {file_name}{extension}"
+msgstr "⬇️ Download {file_name}{extension}"
+
+#: quiz_editor.py:452
+#, python-brace-format
+msgid "⬇️ Télécharger {file_name}{mode}{extension}"
+msgstr "⬇️ Download {file_name}{mode}{extension}"
+
+#: quiz_editor.py:463
+#, python-brace-format
+msgid "⬇️ Télécharger {file_name}_qo{mode}{extension} (questions only)"
+msgstr "⬇️ Download {file_name}_qo{mode}{extension} (questions only)"
+
+#: quiz_editor.py:478
+msgid "📂 Navigation"
+msgstr "📂 Browse"
+
+#: quiz_editor.py:483
+msgid "📥 Importer un nouveau fichier"
+msgstr "📥 Import new file"
+
+#: quiz_editor.py:487
+msgid "Choisir un fichier"
+msgstr "Choose file"
+
+#: quiz_editor.py:489
+msgid "Charge le contenu d'un fichier YAML dans l'éditeur"
+msgstr "Loads the contents of a YAML file into the editor"
+
+#: quiz_editor.py:510
+#, python-brace-format
+msgid "Fichier `{file_name}` chargé avec succès !"
+msgstr "File `{file_name}` loaded successfully!"
+
+#: quiz_editor.py:514
+msgid "Erreur de lecture :"
+msgstr "Read Error:"
+
+#: quiz_editor.py:518
+msgid "🎰🎲♠ Gestion des quizzes"
+msgstr "🎰🎲♠ Quiz management"
+
+#: quiz_editor.py:530
+#, python-brace-format
+msgid "Toutes ({len_all})"
+msgstr "All ({len_all})"
+
+#: quiz_editor.py:531
+msgid "Catégorie"
+msgstr "Category"
+
+#: quiz_editor.py:532
+msgid "Toutes"
+msgstr "All"
+
+#: quiz_editor.py:535
+msgid "Filtrer par Tags"
+msgstr "Filter by Tags"
+
+#: quiz_editor.py:536
+msgid "Choisir un tag"
+msgstr "Choose a tag"
+
+#: quiz_editor.py:571
+#, python-brace-format
+msgid "Choisir une question parmi {lenf}"
+msgstr "Choose a question from {lenf}"
+
+#: quiz_editor.py:588 quiz_editor.py:1019
+msgid "👯 Dupliquer"
+msgstr "👯 Duplicate"
+
+#: quiz_editor.py:604 quiz_editor.py:1014
+msgid "🗑️ Supprimer"
+msgstr "🗑️ Delete"
+
+#: quiz_editor.py:609
+msgid "❗ Confirmer ?"
+msgstr "❗ Confirm?"
+
+#: quiz_editor.py:617
+msgid "Dernier quiz !"
+msgstr "Last quiz!"
+
+#: quiz_editor.py:620
+msgid "Annuler"
+msgstr "Cancel"
+
+#: quiz_editor.py:626
+msgid "➕ Nouveau Quiz"
+msgstr "➕ New Quiz"
+
+#: quiz_editor.py:632
+msgid "Nouvelle question"
+msgstr "New question"
+
+#: quiz_editor.py:633
+msgid "Choix 1"
+msgstr "Choice 1"
+
+#: quiz_editor.py:644
+msgid "📤 Exportation"
+msgstr "📤 Export"
+
+#: quiz_editor.py:652
+msgid "✅ Tout cocher"
+msgstr "✅ Select all"
+
+#: quiz_editor.py:660
+msgid "❌ Tout décocher"
+msgstr "❌ Deselect all"
+
+#: quiz_editor.py:668
+msgid "Sélectionner les questions"
+msgstr "Select questions"
+
+#: quiz_editor.py:687
+#, python-brace-format
+msgid "**{lsq} question(s) sélectionnée(s)**"
+msgstr "**{lsq} question(s) selected**"
+
+#: quiz_editor.py:696
+msgid "Choisir le format d'export"
+msgstr "Choose export format"
+
+#: quiz_editor.py:701
+msgid "Configurer & Exporter"
+msgstr "Configure & Export"
+
+#: quiz_editor.py:707
+msgid "Cochez des questions pour exporter."
+msgstr "Check questions to export."
+
+#: quiz_editor.py:741
+msgid "Le titre principal du fichier YAML (clé 'title') - Modifiable ici."
+msgstr "The main title of the YAML file (key ‘title’) - Editable here."
+
+#: quiz_editor.py:747
+#, python-brace-format
+msgid "Fichier en cours : `{shared_fn}`"
+msgstr "Current file: `{shared_fn}`"
+
+#: quiz_editor.py:753
+msgid "Modifiez pour 'Enregistrer sous'."
+msgstr "Edit to ‘Save As’."
+
+#: quiz_editor.py:756
+msgid "'Enregistrer sous'."
+msgstr "‘Save As’."
+
+#: quiz_editor.py:772
+msgid "💾 Enregistrer"
+msgstr "💾 Save"
+
+#: quiz_editor.py:775
+msgid "YAML nettoyé et enregistré ✔️"
+msgstr "YAML cleaned and saved ✔️"
+
+#: quiz_editor.py:781
+msgid "Télécharger !"
+msgstr "Download!"
+
+#: quiz_editor.py:786
+msgid "Uniquement APRÈS avoir enregistré le YAML"
+msgstr "Only AFTER saving the YAML"
+
+#: quiz_editor.py:816
+#, python-brace-format
+msgid "Édition de {current_quiz}"
+msgstr "Editing {current_quiz}"
+
+#: quiz_editor.py:825
+msgid "Exporter"
+msgstr "Export"
+
+#: quiz_editor.py:829
+msgid "Cocher pour inclure cette question dans le futur export YAML"
+msgstr "Check to include this question in future YAML exports"
+
+#: quiz_editor.py:858
+msgid "🗂️ Catégorie"
+msgstr "🗂️ Category"
+
+#: quiz_editor.py:862
+msgid "Catégorie de la question"
+msgstr "Question category"
+
+#: quiz_editor.py:866
+msgid "➕ Nouvelle catégorie..."
+msgstr "➕ New category..."
+
+#: quiz_editor.py:868
+msgid "Nom de la nouvelle catégorie"
+msgstr "Name of the new category"
+
+#: quiz_editor.py:869
+msgid "Saisissez le nom ici..."
+msgstr "Enter the name here..."
+
+#: quiz_editor.py:871
+msgid "Tapez pour ajouter la catégorie"
+msgstr "Type to add the categor"
+
+#: quiz_editor.py:897
+msgid "🏷️ Tags (Difficulté, Thème secondaire...)"
+msgstr "“🏷️ Tags (Difficulty, Sub-theme...)"
+
+#: quiz_editor.py:901
+msgid "Choisir ou entrer un nouveau tag"
+msgstr "Choose or enter a new tag"
+
+#: quiz_editor.py:919
+msgid "Texte de la question"
+msgstr "Question text"
+
+#: quiz_editor.py:922
+msgid "Supporte le Markdown et le LaTeX (ex: $x^2$)."
+msgstr "upports Markdown and LaTeX (e.g., $x^2$)."
+
+#: quiz_editor.py:934
+msgid "Définit le comportement de validation du quiz."
+msgstr "Defines the validation behavior of the quiz."
+
+#: quiz_editor.py:937 quiz_editor.py:974
+msgid "Label"
+msgstr "Label"
+
+#: quiz_editor.py:939
+msgid "Label de la question."
+msgstr "Question label."
+
+#: quiz_editor.py:942
+msgid "🔗 Contraintes logiques (XOR, IMPLY...)"
+msgstr "🔗 Logical constraints (XOR, IMPLY...)"
+
+#: quiz_editor.py:957
+msgid "Supprimer cette contrainte"
+msgstr "Remove this constraint"
+
+#: quiz_editor.py:961
+msgid "➕ Ajouter une contrainte"
+msgstr "➕ Add constraint"
+
+#: quiz_editor.py:967
+msgid "Propositions"
+msgstr "Propositions"
+
+#: quiz_editor.py:974
+msgid "Identifiant court de la proposition."
+msgstr "Short identifier for the proposition."
+
+#: quiz_editor.py:979
+msgid "Correct ?"
+msgstr "Correct?"
+
+#: quiz_editor.py:983
+msgid "Valeur attendue"
+msgstr "Expected value"
+
+#: quiz_editor.py:997
+msgid "Texte"
+msgstr "Text"
+
+#: quiz_editor.py:998
+msgid "Proposition"
+msgstr "Proposition"
+
+#: quiz_editor.py:1000
+msgid "Explication (réponse)"
+msgstr "Explanation (answer)"
+
+#: quiz_editor.py:1000
+msgid "Message affiché après la validation."
+msgstr "Message displayed after validation."
+
+#: quiz_editor.py:1001
+msgid "Indice (tip)"
+msgstr "Hint (tip)"
+
+#: quiz_editor.py:1001
+msgid "Indice optionnel."
+msgstr "Optional hint."
+
+#: quiz_editor.py:1005
+msgid "Bonus"
+msgstr "Bonus"
+
+#: quiz_editor.py:1005
+msgid "Points ajoutés (défaut = 1)."
+msgstr "Points added (default = 1)."
+
+#: quiz_editor.py:1006
+msgid "Malus"
+msgstr "Penalty"
+
+#: quiz_editor.py:1006
+msgid "Points retirés (défaut = 0)."
+msgstr "Points deducted (default = 0)."
+
+#: quiz_editor.py:1022
+msgid "copie"
+msgstr "copy"
+
+#: quiz_editor.py:1032
+msgid "➕ Ajouter une proposition"
+msgstr "➕ Add a proposal"
+
+#: quiz_editor.py:1037
+msgid "Utilisez la barre latérale pour naviguer ou créer un nouveau quiz."
+msgstr "Use the sidebar to navigate or create a new quiz."

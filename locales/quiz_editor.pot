@@ -1,0 +1,482 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-02-16 16:38+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:39
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:42
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:199
+msgid "New Quiz"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:73
+msgid "⚠️ Unclosed brace"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:105
+#, python-brace-format
+msgid "Render preview ({label}) :</div>"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:118
+msgid "The file name cannot be empty."
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:131
+#, python-brace-format
+msgid "File saved successfully as `{filename}`"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:211
+msgid "Enter a title here"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:226
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:234
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:235
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:571
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:876
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:877
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:878
+msgid "None"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:249
+#, python-brace-format
+msgid "YAML Editor - {FILE_PATH}"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:339
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:768
+msgid "Document Title"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:378
+msgid ""
+"⚠️ File encrypted with password. Be sure to use the `mandatoryInternet=True` "
+"option when initializing the quiz"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:385
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:731
+msgid "Configure & Export"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:390
+msgid "my_quiz"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:391
+msgid "File name (without extension)"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:392
+msgid "Reindex question labels"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:393
+msgid "Reindex to ensure continuity of labels, e.g.: quiz1, quiz2, etc."
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:395
+msgid "Untitled"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:410
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:463
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:727
+msgid "Extract (YAML)"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:411
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:413
+msgid "Encrypted YAML"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:411
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:415
+msgid "Encoded YAML"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:411
+msgid "Unencoded YAML"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:422
+msgid "Password"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:422
+msgid "💡 This pwd participates in encryption"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:432
+msgid ""
+"💡 This mode allows you to save all or part of the questions in a new file, "
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:433
+msgid "with optional encryption."
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:435
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:727
+msgid "Interactive (self-assessment)"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:440
+msgid "💡 This mode allows immediate self-correction for students."
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:442
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:727
+msgid "Exam (Server)"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:443
+msgid "Receiving server URL"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:450
+msgid "Please enter the server URL to continue."
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:453
+msgid "Negative points (-1 malus)"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:458
+msgid "💡 Extraction in LaTeX-AMC format."
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:465
+#, python-brace-format
+msgid "⬇️ Download {file_name}{extension}"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:481
+#, python-brace-format
+msgid "⬇️ Download {file_name}{mode}{extension}"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:492
+#, python-brace-format
+msgid "⬇️ Download {file_name}_qo{mode}{extension} (questions only)"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:507
+msgid "📂 Browse"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:512
+msgid "📥 Import new file"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:516
+msgid "Choose file"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:518
+msgid "Loads the contents of a YAML file into the editor"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:530
+msgid "📖 Enter a title here"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:539
+#, python-brace-format
+msgid "File `{file_name}` loaded successfully!"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:543
+msgid "Read Error:"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:547
+msgid "🎰🎲♠ Quiz management"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:560
+#, python-brace-format
+msgid "All ({len_all})"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:561
+msgid "Category"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:562
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:575
+msgid "All"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:565
+msgid "Filter by Tags"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:566
+msgid "Choose a tag"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:601
+#, python-brace-format
+msgid "Choose a question from {lenf}"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:618
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:1049
+msgid "👯 Duplicate"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:634
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:1044
+msgid "🗑️ Delete"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:639
+msgid "❗ Confirm?"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:647
+msgid "Last quiz!"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:650
+msgid "Cancel"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:656
+msgid "➕ New Quiz"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:662
+msgid "New question"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:663
+msgid "Choice 1"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:674
+msgid "📤 Export"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:682
+msgid "✅ Select all"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:690
+msgid "❌ Deselect all"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:698
+msgid "Select questions"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:717
+#, python-brace-format
+msgid "**{lsq} question(s) selected**"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:726
+msgid "Choose export format"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:737
+msgid "Check questions to export."
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:771
+msgid "The main title of the YAML file (key ‘title’) - Editable here."
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:777
+#, python-brace-format
+msgid "Current file: `{shared_fn}`"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:783
+msgid "Edit to ‘Save As’."
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:786
+msgid "‘Save As’."
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:802
+msgid "💾 Save"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:805
+msgid "YAML cleaned and saved ✔️"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:811
+msgid "Download!"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:816
+msgid "Only AFTER saving the YAML"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:846
+#, python-brace-format
+msgid "Editing {current_quiz}"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:855
+msgid "Export"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:859
+msgid "Check to include this question in future YAML exports"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:878
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:896
+msgid "➕ New category..."
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:888
+msgid "🗂️ Category"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:892
+msgid "Question category"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:898
+msgid "Name of the new category"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:899
+msgid "Enter the name here..."
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:901
+msgid "Type to add the categor"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:927
+msgid "“🏷️ Tags (Difficulty, Sub-theme...)"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:931
+msgid "Choose or enter a new tag"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:949
+msgid "Question text"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:952
+msgid "Supports Markdown and LaTeX (e.g., $x^2$)."
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:964
+msgid "Defines the validation behavior of the quiz."
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:967
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:1004
+msgid "Label"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:969
+msgid "Question label."
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:972
+msgid "🔗 Logical constraints (XOR, IMPLY...)"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:987
+msgid "Remove this constraint"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:991
+msgid "➕ Add constraint"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:997
+msgid "Propositions"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:1004
+msgid "Short identifier for the proposition."
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:1009
+msgid "Correct?"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:1013
+msgid "Expected value"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:1027
+msgid "Text"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:1028
+msgid "Proposition"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:1030
+msgid "Explanation (answer)"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:1030
+msgid "Message displayed after validation."
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:1031
+msgid "Hint (tip)"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:1031
+msgid "Optional hint."
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:1035
+msgid "Bonus"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:1035
+msgid "Points added (default = 1)."
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:1036
+msgid "Penalty"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:1036
+msgid "Points deducted (default = 0)."
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:1052
+msgid "copy"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:1062
+msgid "➕ Add a proposal"
+msgstr ""
+
+#: /Users/bercherj/JFB/dev/quiz_editor/quiz_editor.py:1067
+msgid "Use the sidebar to navigate or create a new quiz."
+msgstr ""
