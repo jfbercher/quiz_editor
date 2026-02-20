@@ -1,4 +1,4 @@
-# English translations for PACKAGE package.
+# French translations for quiz_editor package.
 # Copyright (C) 2026 THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
 # Jean-François BERCHER <jf.bercher@esiee.fr>, 2026.
