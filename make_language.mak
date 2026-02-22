@@ -5,7 +5,8 @@
 # make -f make_language.mak extract LANG=es
 
 PKG = quiz_editor
-MAINDIR = /Users/bercherj/JFB/dev/quiz_editor
+MAINDIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
+#MAINDIR = /Users/bercherj/JFB/dev/quiz_editor
 extract:
 	xgettext -o $(MAINDIR)/locales/$(PKG).pot \
 		--language=Python \
