@@ -6,7 +6,7 @@ import html
 # --- CONFIGURATION ---
 NB_ESSAIS_MAX = 3
 
-def evaluate_fstring(text, context):
+def evaluate_fstring_old(text, context):
     """Remplace les expressions entre accolades par leurs valeurs calculées."""
     if not context or text is None:
         return str(text) if text is not None else ""
@@ -30,6 +30,11 @@ def evaluate_fstring(text, context):
         return re.sub(r'\{(.*?)\}', replace_match, s)
     except Exception:
         return s
+    
+def evaluate_fstring(template, **context):
+    return eval("f" + repr(template), {"__builtins__": {}}, context)
+
+
 def evaluate_text(text, context):
     return html.escape(evaluate_fstring(text, context))
 

@@ -1,7 +1,7 @@
 import random
 import re
 
-def evaluate_fstring(text, context):
+def evaluate_fstring_old(text, context):
     """Évalue les expressions f-string si un contexte est fourni."""
     if not context or text is None: return str(text) if text is not None else ""
     
@@ -21,6 +21,9 @@ def evaluate_fstring(text, context):
         return re.sub(r'\{(.*?)\}', replace_match, s)
     except:
         return s
+
+def evaluate_fstring(template, **context):
+    return eval("f" + repr(template), {"__builtins__": {}}, context)
 
 def convert_to_amc_latex(data, use_negative_points=True):
     latex_output = []
