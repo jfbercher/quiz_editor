@@ -3,6 +3,8 @@ from ruamel.yaml import YAML
 import sys
 import os
 import re
+import types
+
 
 # Simulateur de f-strings
 import numpy as np # For simulation in the validator
@@ -112,7 +114,12 @@ def render_preview(label, text):
     )
             st.info(text) # st.info renders Markdown and LaTeX between $ natively
 
-from ruamel.yaml import YAML
+def help_button(title, content, key):
+    @st.dialog(title)
+    def show():
+        st.markdown(content)
+    if st.button("❓", key=key):
+        show()
 
 def save_my_yaml(filename):
     yaml_format = YAML()
@@ -960,7 +967,6 @@ if st.session_state.current_quiz and filtered_ids:
     # Category field with suggestion of existing categories
     # We use a text_input to allow the addition of new categories
    # Preparation of existing categories 
-# One more
 # Menu options: None, existing, and create option
     current_cat = q_data.get('category', _('None'))
     all_cats = sorted(list(set(data[qid].get('category', _('None')) for qid in quiz_ids_all if data[qid].get('category', _('None')) != _("None"))))
@@ -1056,6 +1062,219 @@ if st.session_state.current_quiz and filtered_ids:
             q_data['label'] =  st.text_input(_("Label"), 
                                 value=q_data.get('label', f'q:{q_id}'), 
                                 help=_("Question label."))
+
+    # IF TEMPLATE EDIT TEMPLATE VARIABLES FOR SIMULATION
+    if q_data['type'] in ['mcq-template', 'numeric-template']:
+        import numpy as np
+        import pandas as pd
+
+
+        # Local RNG instance (not stored in session_state)
+        rng = np.random.default_rng()
+
+        # --- Minimal UI state: store only row identifiers ---
+        if "rows" not in st.session_state:
+            st.session_state.rows = [0]  # List of row IDs
+
+        def is_valid_identifier(name):
+            """Check whether a string is a valid Python variable name."""
+            return re.match(r"^[A-Za-z_][A-Za-z0-9_]*$", name)
+
+        def safe_eval(expr):
+            """
+            Evaluate expression in a restricted namespace.
+            Only rng, numpy and pandas are allowed.
+            """
+            return eval(expr, {"__builtins__": {}}, {"rng": rng, "np": np, "pd": pd})
+        
+        # --- 1. Suggestion Helper ---
+        def get_default_suggestion(var_type, var_structure, engine_display):
+            """Logic to suggest a default string based on type/structure/engine."""
+            #print("default_suggestion", "var_type", var_type, "var_structure", var_structure, "engine_display", engine_display)
+            size = 1 if var_structure == "scalar" else 3
+            if engine_display == "numpy rng.":
+                if var_type == "int":
+                    if size==1:
+                        return f"integers(0, 10)"
+                    return f"integers(0, 10, size={size})"
+                elif var_type == "float":
+                    if size==1:
+                        return f"normal(0, 1)"
+                    return f"normal(0, 1, size={size})"
+                return f"normal(0, 1, size={size})"
+            else:  # pandas
+                if "DataFrame" in var_structure:
+                    return "DataFrame(rng.normal(0, 1, (3,2)))"
+                return "Series(rng.normal(0, 1, 3))"
+
+        # --- 2. Callback for Automatic Updates ---
+        def update_suggestion_callback(q_id, row_id):
+            """Triggered when Type, Structure, or Engine changes to update the Call field."""
+            type_key = f"type_{q_id}_{row_id}"
+            struct_key = f"struct_{q_id}_{row_id}"
+            engine_key = f"engine_{q_id}_{row_id}"
+            call_key = f"call_{q_id}_{row_id}"
+            
+            # Update the call value in session_state immediately
+            st.session_state[call_key] = get_default_suggestion(
+                st.session_state[type_key],
+                st.session_state[struct_key],
+                st.session_state[engine_key]
+            )
+
+        # --- 3. Initialization ---
+        # Ensure the session state for this question is initialized
+        if q_id not in st.session_state:
+            st.session_state[q_id] = types.SimpleNamespace()
+        
+        variables_dict = q_data.get("variables", {})
+        # Initialize the row list
+        st.session_state[q_id].rows = list(range(len(variables_dict)))
+        
+        # Pre-populate session_state with LOADED data so widgets find their values
+        for idx, (name, config) in enumerate(variables_dict.items()):
+            st.session_state[f"name_{q_id}_{idx}"] = name
+            st.session_state[f"type_{q_id}_{idx}"] = config.get("type", "int")
+            st.session_state[f"struct_{q_id}_{idx}"] = config.get("structure", "scalar")
+            st.session_state[f"engine_{q_id}_{idx}"] = config.get("engine", "numpy rng.")
+            st.session_state[f"call_{q_id}_{idx}"] = config.get("call", 
+                get_default_suggestion(
+                    st.session_state[f"type_{q_id}_{idx}"],
+                    st.session_state[f"struct_{q_id}_{idx}"],
+                    st.session_state[f"engine_{q_id}_{idx}"]
+                )
+            )
+
+        st.subheader(_("Template variables"))
+        
+        def on_change_update_and_save(q_id, row_id, update_suggestion=True):
+            if update_suggestion: update_suggestion_callback(q_id, row_id)
+            varname = st.session_state[f"name_{q_id}_{row_id}"]
+            if is_valid_identifier(varname):
+                var_dict = {
+                'type' : st.session_state.get(f"type_{q_id}_{idx}", "int"),
+                "structure": st.session_state.get(f"struct_{q_id}_{idx}", "scalar"),
+                "engine": st.session_state.get(f"engine_{q_id}_{idx}", "numpy rng."),
+                }
+                var_dict["call"] = st.session_state.get(f"call_{q_id}_{row_id}",
+                    get_default_suggestion( var_dict["type"], var_dict["structure"], var_dict["engine"]))
+                if q_data.get("variables") is None:
+                    q_data["variables"] = {}
+                q_data["variables"][varname] = var_dict
+
+
+        # --- Add Variable Button ---
+        cols_header = st.columns([0.04, 1], gap="small")
+        with cols_header[0]:
+            help_button(
+                _("Template variables"),
+                _("""
+                In the case of templates, define the *names* of variables, and 
+                define how to generate values for html or $\LaTeX$-AMC exports.
+                - size is ajustable,
+                - default values are generated corresponding to type and size, but these can be edited. In particular, all distributions from [numpy Generator](https://numpy.org/doc/stable/reference/random/generator.html) can be used.
+                """), 
+                key="add_variable"
+                )
+        with cols_header[1]:
+            if st.button(_("➕ Add variable"), key=f"btn_add_{q_id}"):
+                new_id = max(st.session_state[q_id].rows) + 1 if st.session_state[q_id].rows else 0
+                st.session_state[q_id].rows.append(new_id)
+                # When adding a row, initialize its call to the default suggestion
+                st.session_state[f"call_{q_id}_{new_id}"] = get_default_suggestion("int", "scalar", "numpy rng.")
+
+                #st.rerun()
+
+        # Temporary storage for the current script run
+        active_variables = {}
+
+        # --- 4. Render Rows ---
+        for row_id in st.session_state[q_id].rows:
+            cols = st.columns([1.5, 1, 1.2, 1.2, 2.5, 0.6])
+            
+            # Use keys directly. Streamlit will look into session_state[key] 
+            # to find the value to display.
+            var_name = cols[0].text_input("Name", 
+                            key=f"name_{q_id}_{row_id}", 
+                            label_visibility="collapsed",
+                            on_change=on_change_update_and_save,
+                            args=(q_id, row_id)
+                            )
+            
+            var_type = cols[1].selectbox(
+                "Type", ["int", "float"], 
+                key=f"type_{q_id}_{row_id}",
+                on_change=on_change_update_and_save, args=(q_id, row_id),
+                label_visibility="collapsed"
+            )
+            
+            var_struct = cols[2].selectbox(
+                "Structure", ["scalar", "list", "numpy array", "pandas Series", "pandas DataFrame"],
+                key=f"struct_{q_id}_{row_id}",
+                on_change=on_change_update_and_save, args=(q_id, row_id),
+                label_visibility="collapsed"
+            )
+            
+            engine_disp = cols[3].selectbox(
+                "Engine", ["numpy rng.", "pandas."],
+                key=f"engine_{q_id}_{row_id}",
+                on_change=on_change_update_and_save, args=(q_id, row_id),
+                label_visibility="collapsed"
+            )
+            
+            engine_call = cols[4].text_input("Call", 
+                            key=f"call_{q_id}_{row_id}", 
+                            on_change=on_change_update_and_save, args=(q_id, row_id, False),
+                            label_visibility="collapsed")
+
+            # Delete Row
+            if cols[5].button("❌", key=f"del_{q_id}_row{row_id}"):
+                st.session_state[q_id].rows.remove(row_id)
+                q_data["variables"].pop(var_name, None)
+                st.rerun()
+
+            # --- 5. Capture Valid Data ---
+            # Only store if the variable has a name
+            if var_name:
+                active_variables[var_name] = {
+                    "type": var_type,
+                    "structure": var_struct,
+                    "engine": engine_disp,
+                    "call": engine_call
+                }
+
+            if var_name:
+                if not is_valid_identifier(var_name):
+                    st.error(_("'{name}' is not a valid Python identifier").format(name=var_name))
+                else:
+                    active_variables[var_name] = {
+                        "type": var_type,
+                        "structure": var_struct,
+                        "engine": engine_disp,
+                        "call": engine_call
+                    }
+                    # Map display engine to code prefix
+                    engine_prefix = "rng." if engine_disp == "numpy rng." else "pd."
+                    expression = f"{engine_prefix}{engine_call}"
+                # Try to evaluate for preview
+                try:
+                    #print("expression", expression)
+                    result = safe_eval(expression) # Replace with your actual eval logic
+                    #print("result", result)
+                    st.caption(f"Preview: `{var_name} = {expression}`; eg {result}")
+                except Exception as e:
+                    st.error(f"Error: {e}")
+
+                # 3. PERSISTENCE: Save the accumulated rows into your main data structure
+                # This ensures data[q_id] is always up to date with the UI
+                q_data['variables'] = active_variables
+                data[q_id]['variables'] = active_variables
+                st.session_state.data = data
+
+                # Debug print (optional)
+                #print(f"Current State for {q_id}: {data[q_id]['variables']}")
+
+    # END "IF TEMPLATE" 
 
     # 2. CONSTRAINTS
     with st.expander(_("🔗 Logical constraints (XOR, IMPLY...)"), expanded=False):
