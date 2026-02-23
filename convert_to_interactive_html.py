@@ -2,9 +2,13 @@ import re
 import random
 import math
 import html
+import numpy as np
+import pandas as pd
+
 
 # --- CONFIGURATION ---
 NB_ESSAIS_MAX = 3
+rng = np.random.default_rng()
 
 def evaluate_fstring_old(text, context):
     """Remplace les expressions entre accolades par leurs valeurs calculées."""
@@ -30,13 +34,50 @@ def evaluate_fstring_old(text, context):
         return re.sub(r'\{(.*?)\}', replace_match, s)
     except Exception:
         return s
-    
-def evaluate_fstring(template, **context):
-    return eval("f" + repr(template), {"__builtins__": {}}, context)
 
+
+def strip_f_prefix(template: str) -> str:
+    """Removes the 'f' prefix from the template string."""
+    import re
+    return re.sub(r'^\s*f([\'"]{1,3})', r'\1', template, count=1)
+
+def evaluate_fstring(template, context):
+    if not isinstance(template, str): return template
+
+    template = strip_f_prefix(template)
+    import numpy as np
+    import re
+
+    # Replace $.{...}..$ with {{...}}
+    template = re.sub(
+        r'(?<!\\)\$(.+?)(?<!\\)\$',
+        lambda m: '$' + m.group(1).replace('{', '{{').replace('}', '}}') + '$',
+        template,
+        flags=re.DOTALL
+    )
+
+    safe_globals = {
+        "__builtins__": {},
+        "np": np,
+        "math": math,
+    }
+    #print("safe_globals", safe_globals)
+    #print("template", template)
+    #print("context", context)
+    val = eval("f" + repr(template), safe_globals, context)
+    #print("val", val)
+    if isinstance(val, bool): val = str(val).lower()
+    return val
+
+def safe_eval(expr):
+    """
+    Evaluate expression in a restricted namespace.
+    Only rng, numpy and pandas are allowed.
+    """
+    return eval(expr, {"__builtins__": {}}, {"rng": rng, "np": np, "pd": pd})
 
 def evaluate_text(text, context):
-    return html.escape(evaluate_fstring(text, context))
+    return html.escape(evaluate_fstring(text, context)).strip("'").strip('"')
 
 def convert_to_interactive_html(data):
     html_content = []
@@ -88,10 +129,18 @@ def convert_to_interactive_html(data):
         context = {}
         q_type = str(q_content.get('type', 'qcm')).lower()
         if "template" in q_type:
-            full_text = str(q_content.get('question', ''))
+            variables = q_content.get('variables', [])
+            for var_name in variables.keys():
+                engine = variables[var_name].get('engine')
+                engine_call = variables[var_name].get('call')
+                engine_prefix = "rng." if engine == "numpy rng." else "pd."
+                expression = f"{engine_prefix}{engine_call}"
+                context[var_name] = safe_eval(expression)
+
+            '''full_text = str(q_content.get('question', ''))
             found_vars = re.findall(r'\{([a-zA-Z_][a-zA-Z0-9_]*)\}', full_text)
             for var in set(found_vars):
-                context[var] = round(random.gauss(10, 2), 2) # Exemple Gaussienne
+                context[var] = round(random.gauss(10, 2), 2) # Exemple Gaussienne'''
 
         # 2. DEBUT CARTE
         html_content.append(f"<div class='question-card' id='card_{q_id}' data-type='{q_type}' data-attempts='0'>")
@@ -105,9 +154,13 @@ def convert_to_interactive_html(data):
         # 3. CONTENU QUESTION
         if "numeric" in q_type:
             for i, p in enumerate(props):
-                v_exp = evaluate_text(p.get('expected', ''), context)
+                v_exp = p.get('expected', '') 
+                if not '{' in v_exp: v_exp = f'{{ {v_exp} }}'
+                v_exp = evaluate_fstring(v_exp, context)
+                v_exp = v_exp.strip().strip("'").strip('"')
+                v_exp = float(v_exp) # to extend later with type checking
                 v_prop = evaluate_text(p.get('proposition', ''), context)
-                v_rep = evaluate_text(p.get('reponse', ''), context)
+                v_rep = evaluate_text(p.get('answer', ''), context)
                 html_content.append(f"""
                 <div class='numeric-unit'>
                     <label>{v_prop}</label><br>
@@ -116,13 +169,24 @@ def convert_to_interactive_html(data):
                     <div class='explanation-box' id='expl_{q_id}_{i}'><b>Réponse :</b> {v_exp}<br>{v_rep}</div>
                 </div>""")
 
-
         else:
             html_content.append("<div class='options-container'>")
             for i, p in enumerate(props):
                 v_prop = evaluate_text(p.get('proposition', ''), context)
-                v_rep = evaluate_text(p.get('reponse', ''), context)
-                is_exp = "true" if p.get('expected') is True else "false"
+                v_rep = evaluate_text(p.get('answer', ''), context)
+                v_exp = p.get('expected', '') 
+                if not '{' in v_exp: v_exp = f'{{{v_exp}}}'
+                v_exp = evaluate_fstring(v_exp, context)
+                if isinstance(v_exp, str): v_exp = v_exp.strip().strip("'").strip('"')
+                if not isinstance(v_exp, bool): 
+                    if v_exp == 'True': v_exp = True 
+                    elif v_exp == 'False': v_exp = False 
+                    else: v_exp = float(v_exp) ## to extend later with type checking
+                #print(context)
+                #print("ori", p.get('expected', '') ,"v_exp after bool", v_exp)
+                is_exp = "true" if v_exp is True else "false"
+                #print("--> checkboxes", p.get('expected', ''), v_exp, is_exp)
+
                 html_content.append(f"""
                 <div class='option' id='opt_{q_id}_{i}' data-expected='{is_exp}' onclick='toggleOption(this)'>
                     <input type='checkbox' style='margin-right:12px' onclick='event.stopPropagation()'>
