@@ -30,7 +30,9 @@ languages = {
     "fr": "🇫🇷 Français",
     "es": "🇪🇸 Spanish",
     "it": "🇮🇹 Italian",
-    "de": "🇩🇪 German"
+    "de": "🇩🇪 German",
+    "ar": "🇪🇨 Arabic",
+    "cn": "🇨🇳 Chinese",
 }
 
 lang = st.sidebar.selectbox(
