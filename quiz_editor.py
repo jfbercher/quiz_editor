@@ -457,7 +457,7 @@ def export_config_dialog(selected_qids, format_type):
 
     if format_type == _("Interactive (self-assessment)"):
         from convert_to_interactive_html import convert_to_interactive_html
-        output_content = convert_to_interactive_html(export_data)
+        output_content = convert_to_interactive_html(export_data, lang=st.session_state.lang)
         extension = ".html"
         mime_type = "text/html"
         st.info(_("💡 This mode allows immediate self-correction for students."))
@@ -466,7 +466,7 @@ def export_config_dialog(selected_qids, format_type):
         server_url = st.text_input(_("Receiving server URL"), placeholder="https://script.google.com/...")
         if server_url:
             from convert_to_html_exam import convert_to_server_quiz
-            output_content = convert_to_server_quiz(export_data, server_url)
+            output_content = convert_to_server_quiz(export_data, server_url, lang=st.session_state.lang)
             extension = ".html"
             mime_type = "text/html"
         else:
@@ -1132,8 +1132,10 @@ if st.session_state.current_quiz and filtered_ids:
         st.session_state[q_id].rows = list(range(len(variables_dict)))
         
         # Pre-populate session_state with LOADED data so widgets find their values
+        variables_dict = {k: variables_dict[k] for k in sorted(variables_dict)}
         for idx, (name, config) in enumerate(variables_dict.items()):
             st.session_state[f"name_{q_id}_{idx}"] = name
+            st.session_state[f"name_{q_id}_{idx}_old"] = name
             st.session_state[f"type_{q_id}_{idx}"] = config.get("type", "int")
             st.session_state[f"struct_{q_id}_{idx}"] = config.get("structure", "scalar")
             st.session_state[f"engine_{q_id}_{idx}"] = config.get("engine", "numpy rng.")
@@ -1150,11 +1152,17 @@ if st.session_state.current_quiz and filtered_ids:
         def on_change_update_and_save(q_id, row_id, update_suggestion=True):
             if update_suggestion: update_suggestion_callback(q_id, row_id)
             varname = st.session_state[f"name_{q_id}_{row_id}"]
+            old_varname = st.session_state[f"name_{q_id}_{row_id}_old"]
+            if varname != old_varname:
+                # varname has changed - delete the old one
+                st.session_state[f"name_{q_id}_{row_id}_old"] = varname
+                if old_varname in q_data.get("variables", {}):
+                    del q_data["variables"][old_varname]
             if is_valid_identifier(varname):
                 var_dict = {
-                'type' : st.session_state.get(f"type_{q_id}_{idx}", "int"),
-                "structure": st.session_state.get(f"struct_{q_id}_{idx}", "scalar"),
-                "engine": st.session_state.get(f"engine_{q_id}_{idx}", "numpy rng."),
+                'type' : st.session_state.get(f"type_{q_id}_{row_id}", "int"),
+                "structure": st.session_state.get(f"struct_{q_id}_{row_id}", "scalar"),
+                "engine": st.session_state.get(f"engine_{q_id}_{row_id}", "numpy rng."),
                 }
                 var_dict["call"] = st.session_state.get(f"call_{q_id}_{row_id}",
                     get_default_suggestion( var_dict["type"], var_dict["structure"], var_dict["engine"]))
@@ -1194,12 +1202,16 @@ if st.session_state.current_quiz and filtered_ids:
             
             # Use keys directly. Streamlit will look into session_state[key] 
             # to find the value to display.
+            key_name = f"name_{q_id}_{row_id}"
+            # Key for storing the old value
+            if f"{key_name}_old" not in st.session_state:
+                st.session_state[f"{key_name}_old"] = ""
             var_name = cols[0].text_input("Name", 
                             key=f"name_{q_id}_{row_id}", 
                             label_visibility="collapsed",
                             on_change=on_change_update_and_save,
                             args=(q_id, row_id)
-                            )
+                            ) 
             
             var_type = cols[1].selectbox(
                 "Type", ["int", "float"], 
@@ -1355,7 +1367,7 @@ if st.session_state.current_quiz and filtered_ids:
                 st.markdown("<div style='padding-top: 28px;'></div>", unsafe_allow_html=True)
                 
                 if st.button(_("🗑️ Delete"), key=f"del_{q_id}_{i}", use_container_width=True):
-                    q_data['propositions'].pop(i)
+                    q_data['propositions'].pop(i) 
                     st.rerun()
 
                 # Duplicate button just below, with no extra space
