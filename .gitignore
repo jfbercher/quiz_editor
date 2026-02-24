@@ -2,6 +2,8 @@
 __pycache__/
 *.py[codz]
 *$py.class
+*.po~
+*.yaml
 
 .DS_Store
 sav/
@@ -11,6 +13,7 @@ sav/
 
 # Distribution / packaging
 .Python
+sav/
 build/
 develop-eggs/
 dist/
