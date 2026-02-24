@@ -65,7 +65,7 @@ def convert_to_interactive_html(data, lang='en'):
         context = {}
         q_type = str(q_content.get('type', 'qcm')).lower()
         if "template" in q_type:
-            variables = q_content.get('variables', [])
+            variables = q_content.get('variables', {})
             for var_name in variables.keys():
                 engine = variables[var_name].get('engine')
                 engine_call = variables[var_name].get('call')
