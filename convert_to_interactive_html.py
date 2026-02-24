@@ -1,89 +1,20 @@
-import re
 import random
-import math
-import html
 import numpy as np
 import pandas as pd
-
+from i18n import get_translator
+from convert_utils import evaluate_text, safe_eval, processPropositions
 
 # --- CONFIGURATION ---
-NB_ESSAIS_MAX = 3
+NB_MAX_ATTEMPTS = 3
 rng = np.random.default_rng()
 
-def evaluate_fstring_old(text, context):
-    """Remplace les expressions entre accolades par leurs valeurs calculées."""
-    if not context or text is None:
-        return str(text) if text is not None else ""
-    
-    s = str(text).strip()
-    s = re.sub(r"^[fF]?['\"]+", "", s)
-    s = re.sub(r"['\"]+$", "", s)
-    
-    if '{' not in s:
-        return s
-        
-    try:
-        def replace_match(match):
-            content = match.group(1).strip()
-            expr = content.split(':')[0].strip()
-            fmt = content.split(':')[1].strip() if ':' in content else ""
-            val = eval(expr, {"__builtins__": None, "math": math}, context)
-            if isinstance(val, bool): val = str(val).lower()
-            return f"{val:{fmt}}" if fmt else str(val)
-        
-        return re.sub(r'\{(.*?)\}', replace_match, s)
-    except Exception:
-        return s
-
-
-def strip_f_prefix(template: str) -> str:
-    """Removes the 'f' prefix from the template string."""
-    import re
-    return re.sub(r'^\s*f([\'"]{1,3})', r'\1', template, count=1)
-
-def evaluate_fstring(template, context):
-    if not isinstance(template, str): return template
-
-    template = strip_f_prefix(template)
-    import numpy as np
-    import re
-
-    # Replace $.{...}..$ with {{...}}
-    template = re.sub(
-        r'(?<!\\)\$(.+?)(?<!\\)\$',
-        lambda m: '$' + m.group(1).replace('{', '{{').replace('}', '}}') + '$',
-        template,
-        flags=re.DOTALL
-    )
-
-    safe_globals = {
-        "__builtins__": {},
-        "np": np,
-        "math": math,
-    }
-    #print("safe_globals", safe_globals)
-    #print("template", template)
-    #print("context", context)
-    val = eval("f" + repr(template), safe_globals, context)
-    #print("val", val)
-    if isinstance(val, bool): val = str(val).lower()
-    return val
-
-def safe_eval(expr):
-    """
-    Evaluate expression in a restricted namespace.
-    Only rng, numpy and pandas are allowed.
-    """
-    return eval(expr, {"__builtins__": {}}, {"rng": rng, "np": np, "pd": pd})
-
-def evaluate_text(text, context):
-    return html.escape(evaluate_fstring(text, context)).strip("'").strip('"')
-
-def convert_to_interactive_html(data):
+def convert_to_interactive_html(data, lang='en'):
+    _ = get_translator(lang)
     html_content = []
     
     # --- HEADER & STYLE ---
-    html_content.append(f"""<!DOCTYPE html>
+
+    html_content.append("""<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
@@ -117,15 +48,20 @@ def convert_to_interactive_html(data):
 </head>
 <body>
     <div id="global-score-banner">
-        {data.get('title','')} <br>
-        👉🏼 Score global : <span id="total-score">0.00</span> / <span id="total-max">0</span>
+        {data_title} <br>
+        👉🏼 {global_score} <span id="total-score">0.00</span> / <span id="total-max">0</span>
     </div>
-""")
+""".format(lang=lang, 
+           global_score=_("Global Score"),
+           data_title=data.get('title', ''),
+           )
+        )
+    
 
     for q_id, q_content in data.items():
         if q_id == "title" or not isinstance(q_content, dict): continue
         
-        # 1. GENERATION CONTEXTE (POUR TEMPLATES)
+        # 1. CONTEXT GENERATION (FOR TEMPLATES)
         context = {}
         q_type = str(q_content.get('type', 'qcm')).lower()
         if "template" in q_type:
@@ -137,12 +73,7 @@ def convert_to_interactive_html(data):
                 expression = f"{engine_prefix}{engine_call}"
                 context[var_name] = safe_eval(expression)
 
-            '''full_text = str(q_content.get('question', ''))
-            found_vars = re.findall(r'\{([a-zA-Z_][a-zA-Z0-9_]*)\}', full_text)
-            for var in set(found_vars):
-                context[var] = round(random.gauss(10, 2), 2) # Exemple Gaussienne'''
-
-        # 2. DEBUT CARTE
+        # 2. START CARD
         html_content.append(f"<div class='question-card' id='card_{q_id}' data-type='{q_type}' data-attempts='0'>")
         
         q_text = evaluate_text(q_content.get('question', ''), context)
@@ -151,40 +82,30 @@ def convert_to_interactive_html(data):
         props = q_content.get('propositions', [])
         random.shuffle(props)
 
-        # 3. CONTENU QUESTION
+
+        # 3. QUESTION CONTENT
         if "numeric" in q_type:
             for i, p in enumerate(props):
-                v_exp = p.get('expected', '') 
-                if not '{' in v_exp: v_exp = f'{{ {v_exp} }}'
-                v_exp = evaluate_fstring(v_exp, context)
-                v_exp = v_exp.strip().strip("'").strip('"')
-                v_exp = float(v_exp) # to extend later with type checking
-                v_prop = evaluate_text(p.get('proposition', ''), context)
-                v_rep = evaluate_text(p.get('answer', ''), context)
-                html_content.append(f"""
+                v_prop, v_exp, v_rep, v_lab = processPropositions(p, q_type, context)
+                html_content.append("""
                 <div class='numeric-unit'>
                     <label>{v_prop}</label><br>
                     <input type='number' step='any' class='numeric-input' id='input_{q_id}_{i}' 
-                           data-expected='{v_exp}' data-tol-abs='{p.get('tolerance_abs', 0)}' data-tol-rel='{p.get('tolerance', 0.01)}'>
-                    <div class='explanation-box' id='expl_{q_id}_{i}'><b>Réponse :</b> {v_exp}<br>{v_rep}</div>
-                </div>""")
+                           data-expected='{v_exp}' data-tol-abs='{tol_abs}' data-tol-rel='{tol}'>
+                    <div class='explanation-box' id='expl_{q_id}_{i}'><b>{answer}</b> {v_exp}<br>{v_rep}</div>
+                </div>""".format(v_prop=v_prop, q_id=q_id, i=i, v_exp=v_exp, 
+                                 v_rep=v_rep, tol_abs=p.get('tolerance_abs', 0), 
+                                 tol=p.get('tolerance', 0.01),
+                                 answer = _("Answer:")
+                                 )
+                )
 
         else:
             html_content.append("<div class='options-container'>")
             for i, p in enumerate(props):
-                v_prop = evaluate_text(p.get('proposition', ''), context)
-                v_rep = evaluate_text(p.get('answer', ''), context)
-                v_exp = p.get('expected', '') 
-                if not '{' in v_exp: v_exp = f'{{{v_exp}}}'
-                v_exp = evaluate_fstring(v_exp, context)
-                if isinstance(v_exp, str): v_exp = v_exp.strip().strip("'").strip('"')
-                if not isinstance(v_exp, bool): 
-                    if v_exp == 'True': v_exp = True 
-                    elif v_exp == 'False': v_exp = False 
-                    else: v_exp = float(v_exp) ## to extend later with type checking
-                #print(context)
-                #print("ori", p.get('expected', '') ,"v_exp after bool", v_exp)
-                is_exp = "true" if v_exp is True else "false"
+                v_prop, v_exp, v_rep, v_lab = processPropositions(p, q_type, context)
+                is_exp = "true" if v_exp else "false"
+                #print("debug:", v_exp, type(v_exp), is_exp)
                 #print("--> checkboxes", p.get('expected', ''), v_exp, is_exp)
 
                 html_content.append(f"""
@@ -197,22 +118,25 @@ def convert_to_interactive_html(data):
                 </div>""")
             html_content.append("</div>")
 
-        # 4. ACTIONS ET SCORE
-        html_content.append(f"""
+        # 4. ACTIONS AND SCORE
+        html_content.append("""
             <div id='feedback_{q_id}' style='margin-top:15px; font-weight:bold; color:#2c3e50;'></div>
-            <div class='attempts-hint' id='hint_{q_id}'>Tentatives : 0 / {NB_ESSAIS_MAX}</div>
+            <div class='attempts-hint' id='hint_{q_id}'>{attempts} 0 / {NB_MAX_ATTEMPTS}</div>
             <div class='btn-group' id='btns_{q_id}'>
-                <button class='btn btn-validate' id='val_{q_id}' onclick='validate("{q_id}")'>Valider</button>
-                <button class='btn btn-correct' id='corr_{q_id}' onclick='correct("{q_id}")'>Correction</button>
+                <button class='btn btn-validate' id='val_{q_id}' onclick='validate("{q_id}")'>{submit}</button>
+                <button class='btn btn-correct' id='corr_{q_id}' onclick='correct("{q_id}")'>{correction}</button>
                 <button class='btn btn-reset' onclick='resetQuestion("{q_id}")'>Reset</button>
             </div>
-        </div>""")
+        </div>""".format(q_id=q_id, NB_MAX_ATTEMPTS=NB_MAX_ATTEMPTS, 
+                         attempts=_("Attempts:"), submit=_("Submit"), correction=_("Correction")
+                         )
+        )
 
     # --- JAVASCRIPT ---
-    html_content.append(f"""
+    html_content.append("""
 <script>
     let questionScores = {{}};
-    const MAX_ESSAIS = {NB_ESSAIS_MAX};
+    const MAX_ATTEMPTS = {NB_MAX_ATTEMPTS};
 
     function updateGlobalScore() {{
         let totalPoints = 0;
@@ -237,7 +161,7 @@ def convert_to_interactive_html(data):
         const card = document.getElementById('card_' + id);
         let attempts = parseInt(card.getAttribute('data-attempts')) + 1;
         card.setAttribute('data-attempts', attempts);
-        document.getElementById('hint_' + id).innerText = `Tentatives : ${{attempts}} / ${{MAX_ESSAIS}}`;
+        document.getElementById('hint_' + id).innerText = `{attempts} ${{attempts}} / ${{MAX_ATTEMPTS}}`;
 
 
         if (card.getAttribute('data-type').includes('numeric')) {{
@@ -275,7 +199,7 @@ def convert_to_interactive_html(data):
         updateGlobalScore();
         document.getElementById('feedback_' + id).innerText = "Score : " + score.toFixed(2) + " / 1";
 
-        if (attempts >= MAX_ESSAIS) {{
+        if (attempts >= MAX_ATTEMPTS) {{
             const btn = document.getElementById('val_' + id);
             btn.disabled = true;
             btn.classList.add('disabled');
@@ -306,7 +230,7 @@ def convert_to_interactive_html(data):
         
         // 1. Réinitialisation standard (Essais, bouton, feedback)
         card.setAttribute('data-attempts', 0);
-        document.getElementById('hint_' + id).innerText = `Tentatives : 0 / ${{MAX_ESSAIS}}`;
+        document.getElementById('hint_' + id).innerText = `{attempts} 0 / ${{MAX_ATTEMPTS}}`;
         document.getElementById('feedback_' + id).innerText = "";
         
         const btnVal = document.getElementById('val_' + id);
@@ -350,7 +274,7 @@ def convert_to_interactive_html(data):
     function resetQuestionOld(id) {{
         const card = document.getElementById('card_' + id);
         card.setAttribute('data-attempts', 0);
-        document.getElementById('hint_' + id).innerText = `Tentatives : 0 / ${{MAX_ESSAIS}}`;
+        document.getElementById('hint_' + id).innerText = `{attempts} 0 / ${{MAX_ATTEMPTS}}`;
         document.getElementById('feedback_' + id).innerText = "";
         
         const btnVal = document.getElementById('val_' + id);
@@ -366,5 +290,7 @@ def convert_to_interactive_html(data):
     }}
 </script>
 </body>
-</html>""")
+</html>""".format(
+    NB_MAX_ATTEMPTS=NB_MAX_ATTEMPTS, attempts=_("Attempts:")
+))
     return "\n".join(html_content)
