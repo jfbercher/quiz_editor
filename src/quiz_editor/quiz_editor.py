@@ -18,7 +18,7 @@ import ast
 from .convert_quiz_format import convert_quiz_data_v1_to_v2
 #from i18n import _
 
-from i18n import init_i18n, set_language, get_translator
+from .i18n import init_i18n, set_language, get_translator
 
 def main():
 
