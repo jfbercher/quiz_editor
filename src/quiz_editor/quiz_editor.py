@@ -1106,8 +1106,15 @@ if st.session_state.current_quiz and filtered_ids:
                 return f"normal(0, 1, size={size})"
             else:  # pandas
                 if "DataFrame" in var_structure:
-                    return "DataFrame(rng.normal(0, 1, (3,2)))"
-                return "Series(rng.normal(0, 1, 3))"
+                    if var_type == "int":
+                        return "DataFrame(rng.integers(0, 10, (3,2)))"
+                    else:
+                        return "DataFrame(rng.normal(0, 1, (3,2)))"
+                else:
+                    if var_type == "int":
+                        return "Series(rng.integers(0, 10, 3))"
+                    else:
+                        return "Series(rng.normal(0, 1, 3))"
 
         # --- 2. Callback for Automatic Updates ---
         def update_suggestion_callback(q_id, row_id):
