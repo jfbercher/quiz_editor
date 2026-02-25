@@ -1,8 +1,8 @@
 import random
 import numpy as np
 import pandas as pd
-from i18n import get_translator
-from convert_utils import evaluate_text, safe_eval, processPropositions
+from .i18n import get_translator
+from .convert_utils import evaluate_text, safe_eval, processPropositions
 
 # --- CONFIGURATION ---
 NB_MAX_ATTEMPTS = 3
