@@ -15,7 +15,7 @@ import io, copy
 from io import StringIO
 from collections import Counter
 import ast
-from convert_quiz_format import convert_quiz_data_v1_to_v2
+from .convert_quiz_format import convert_quiz_data_v1_to_v2
 #from i18n import _
 
 from i18n import init_i18n, set_language, get_translator
@@ -459,7 +459,7 @@ def main():
             + _("with optional encryption."))
 
         if format_type == _("Interactive (self-assessment)"):
-            from convert_to_interactive_html import convert_to_interactive_html
+            from .convert_to_interactive_html import convert_to_interactive_html
             output_content = convert_to_interactive_html(export_data, lang=st.session_state.lang)
             extension = ".html"
             mime_type = "text/html"
@@ -477,7 +477,7 @@ def main():
 
         elif format_type == "AMC (LaTeX)":
             neg_points = st.checkbox(_("Negative points (-1 malus)"), value=True)
-            from amc_exporter import convert_to_amc_latex
+            from .amc_exporter import convert_to_amc_latex
             output_content = convert_to_amc_latex(export_data, use_negative_points=neg_points)
             extension = ".tex"
             mime_type = "text/x-tex"
