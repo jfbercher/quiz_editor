@@ -11,7 +11,7 @@ import numpy as np # For simulation in the validator
 import random
 import ast  #For simulation in the validator
 import tokenize
-import io, copy
+import io
 from io import StringIO
 from collections import Counter
 import ast
@@ -21,6 +21,7 @@ from .convert_quiz_format import convert_quiz_data_v1_to_v2
 from .i18n import init_i18n, set_language, get_translator
 
 def main():
+    import copy
 
     _ = init_i18n(default_lang="en")
 
