@@ -1,5 +1,4 @@
 PKG_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
-SRC_DIR=src/quiz_editor
 
 #make release v=0.3.9
 #make build

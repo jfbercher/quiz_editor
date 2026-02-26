@@ -1,9 +1,9 @@
 import argparse
-import tomllib  # Python ≥3.11
 from pathlib import Path
 
 try:
     import tomlkit  # pour préserver le format
+    import tomllib  # Python ≥3.11
 except ImportError:
     import tomli as tomllib
     #raise SystemExit("Installez tomlkit : pip install tomlkit")
