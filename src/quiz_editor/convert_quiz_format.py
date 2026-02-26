@@ -15,6 +15,7 @@ def convert_quiz_data_v1_to_v2(data):
     for quiz_id, entry in new_data.items():
         if quiz_id == "title": continue
         propositions = entry.get("propositions") or []
+        constraints = entry.get("constraints", [])
         quiz_type = entry.get("type", "mcq")
         
         # Normalize types
@@ -27,6 +28,10 @@ def convert_quiz_data_v1_to_v2(data):
         for prop in propositions: 
             if "reponse" in prop:
                 prop["answer"] = prop.pop("reponse")
+        # Rename 'indices' key to 'indexes' in constraints
+        for constraint in constraints:
+            if "indices" in constraint:
+                constraint["indexes"] = constraint.pop("indices")
 
     return new_data
 

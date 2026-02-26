@@ -1311,7 +1311,7 @@ def main():
                 cc1, cc2, cc3, cc4 = st.columns([1, 2, 1, 0.5])
                 
                 c['type'] = cc1.selectbox("Type", constraints_types, index=constraints_types.index(c.get('type', 'XOR')) if c.get('type') in constraints_types else 0, key=f"ct_{q_id}_{idx}")
-                c['indices'] = cc2.multiselect("Labels (max 2)", available_labels, default=[i for i in c.get('indices', []) if i in available_labels], max_selections=2, key=f"ci_{q_id}_{idx}")
+                c['indexes'] = cc2.multiselect("Labels (max 2)", available_labels, default=[i for i in c.get('indexes', []) if i in available_labels], max_selections=2, key=f"ci_{q_id}_{idx}")
                 c['malus'] = cc3.number_input("Malus", value=int(c.get('malus', 1)), key=f"cm_{q_id}_{idx}")
                 
                 cc4.markdown("<div style='padding-top: 28px;'></div>", unsafe_allow_html=True)
@@ -1320,7 +1320,7 @@ def main():
                     st.rerun()
             
             if st.button(_("➕ Add constraint")):
-                q_data['constraints'].append({"indices": [], "type": "XOR", "malus": 1})
+                q_data['constraints'].append({"indexes": [], "type": "XOR", "malus": 1})
                 st.rerun()
 
         # 3. PROPOSITIONS
