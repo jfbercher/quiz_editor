@@ -20,7 +20,7 @@ from convert_quiz_format import convert_quiz_data_v1_to_v2
 
 from i18n import init_i18n, set_language, get_translator
 
-st.set_page_config(layout="wide", page_title=_("YAML Editor - {FILE_PATH}").format(FILE_PATH=FILE_PATH),  
+st.set_page_config(layout="wide", page_title="YAML Editor",  
                 page_icon="1F4C3.png") #📃")
 
 def main():
