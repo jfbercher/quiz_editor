@@ -1259,14 +1259,6 @@ def main():
                 # --- 5. Capture Valid Data ---
                 # Only store if the variable has a name
                 if var_name:
-                    active_variables[var_name] = {
-                        "type": var_type,
-                        "structure": var_struct,
-                        "engine": engine_disp,
-                        "call": engine_call
-                    }
-
-                if var_name:
                     if not is_valid_identifier(var_name):
                         st.error(_("'{name}' is not a valid Python identifier").format(name=var_name))
                     else:
@@ -1279,23 +1271,23 @@ def main():
                         # Map display engine to code prefix
                         engine_prefix = "rng." if engine_disp == "numpy rng." else "pd."
                         expression = f"{engine_prefix}{engine_call}"
-                    # Try to evaluate for preview
-                    try:
-                        #print("expression", expression)
-                        result = safe_eval(expression) # Replace with your actual eval logic
-                        #print("result", result)
-                        st.caption(f"Preview: `{var_name} = {expression}`; eg {result}")
-                    except Exception as e:
-                        st.error(f"Error: {e}")
+                        # Try to evaluate for preview
+                        try:
+                            #print("expression", expression)
+                            result = safe_eval(expression) # Replace with your actual eval logic
+                            #print("result", result)
+                            st.caption(f"Preview: `{var_name} = {expression}`; eg {result}")
+                        except Exception as e:
+                            st.error(f"Error: {e}")
 
-                    # 3. PERSISTENCE: Save the accumulated rows into your main data structure
-                    # This ensures data[q_id] is always up to date with the UI
-                    q_data['variables'] = active_variables
-                    data[q_id]['variables'] = active_variables
-                    st.session_state.data = data
+                        # 3. PERSISTENCE: Save the accumulated rows into your main data structure
+                        # This ensures data[q_id] is always up to date with the UI
+                        q_data['variables'] = active_variables
+                        data[q_id]['variables'] = active_variables
+                        st.session_state.data = data
 
-                    # Debug print (optional)
-                    #print(f"Current State for {q_id}: {data[q_id]['variables']}")
+                        # Debug print (optional)
+                        #print(f"Current State for {q_id}: {data[q_id]['variables']}")
 
         # END "IF TEMPLATE" 
 
