@@ -12,7 +12,7 @@ def strip_f_prefix(template: str) -> str:
     import re
     return re.sub(r'^\s*f([\'"]{1,3})', r'\1', template, count=1)
 
-def evaluate_fstring(template, context):
+def evaluate_fstring_previous(template, context):
     if not isinstance(template, str): return template
     if not '{' in template: return template
 
@@ -37,6 +37,34 @@ def evaluate_fstring(template, context):
     val = eval("f" + repr(template), safe_globals, context).strip("'").strip('"')
     #print("val", val)
     #if isinstance(val, bool): val = str(val).lower()
+    return val
+
+def evaluate_fstring(template, context):
+    import re
+    if not isinstance(template, str): return template
+    template = strip_f_prefix(template)
+    
+    # Replace $.{...}..$ with {{...}} for latex commands but not for possible "f-strings"
+    template = re.sub(
+    r'(?<!\\)\$(.+?)(?<!\\)\$',
+    lambda m: '$' + re.sub(
+        r'\\[a-zA-Z]+\{[^{}]*\}',
+        lambda c: c.group(0).replace('{', '{{').replace('}', '}}'),
+        m.group(1)
+    ) + '$',
+    template,
+    flags=re.DOTALL
+    )
+    
+    #template = replace_latex_braces(template)
+
+    safe_globals = {
+        "__builtins__": {},
+        "np": np,
+    }
+
+    
+    val = eval("f" + repr(template), safe_globals, context).strip("'").strip('"')
     return val
 
 def safe_eval(expr):
