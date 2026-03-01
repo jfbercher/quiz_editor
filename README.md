@@ -53,42 +53,30 @@ Or use the hosted version:
 👉 [https://jfb-quizeditor.streamlit.app/](https://jfb-quizeditor.streamlit.app/)
 
 ---
-  
-:::{figure} https://github.com/jfbercher/labquiz/raw/main/docs/doc_images/quiz_editor_2.png
-:name: quiz_editor_1
-:label:fig24
-:alt: quiz_editor
-:align: center
-:width: 90%
+
+<div align="center">
+  <img src="https://github.com/jfbercher/labquiz/raw/main/docs/doc_images/quiz_editor_2.png" width="80%" height="auto" alt="quiz_editor">
+
 `quiz_editor` -- editing a question, with category, tags, choice of question type (multiple choice, numeric, etc.)
-:::
-:::{figure} https://github.com/jfbercher/labquiz/raw/main/docs/doc_images/quiz_editor_1.png
-:name: quiz_editor_2
-:label:fig25
-:alt: quiz_editor
-:align: center
-:width: 90%
+</div>  
+
+<div align="center">
+  <img src="https://github.com/jfbercher/labquiz/raw/main/docs/doc_images/quiz_editor_1.png" width="90%" height="auto" alt="quiz_editor">
+
 `quiz_editor` -- editing a proposition -- correct or incorrect, hint (tip), answer (displayed during correction), bonus, penalty, etc.
-:::
-:::{figure} https://github.com/jfbercher/labquiz/raw/main/docs/doc_images/exports1.png
-:name: quiz_editor_exports
-:label:fig26
-:alt: quiz_editor_exports
-:align: center
+</div>  
+
+<div align="center">
+  <img src="https://github.com/jfbercher/labquiz/raw/main/docs/doc_images/exports1.png" width="90%" height="auto" alt="quiz_editor_exports">
 
 `quiz_editor` -- Export examples (AMC-$\LaTeX$, interactive HTML, HTML-exam)
-:::
+</div>  
 
-:::{figure} https://github.com/jfbercher/labquiz/raw/main/docs/doc_images/exports2.png
-:name: quiz_editor_exports_bis
-:label:fig27
-:alt: quiz_editor_exports
-:align: center
-:width: 40%
-
+<div align="center">
+  <img src="https://github.com/jfbercher/labquiz/raw/main/docs/doc_images/exports2.png" width="40%" height="auto" alt="Centered image">
+ 
 `quiz_editor` -- YAML Export with normal/encoded/encrypted options and question-only file
-:::
-
+</div>  
 ---
 
 ## Supported Question Types
