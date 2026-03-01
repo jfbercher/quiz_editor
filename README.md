@@ -44,8 +44,9 @@ pip install git+https://github.com/jfbercher/quiz_editor.git
 
 ## Launch
 
+An entry-point is provided that allows to simply use 
 ```bash
-streamlit run quiz_editor.py
+quiz_editor
 ```
 
 Or use the hosted version:
