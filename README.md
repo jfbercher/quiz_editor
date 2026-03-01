@@ -5,7 +5,7 @@
 
 **Visual editor for creating, managing, and exporting LabQuiz question banks.**
 
-`quiz_editor` is a Streamlit-based application designed to help instructors build structured quiz databases for use with **[LabQuiz](https://github.com/jfbercher/labquiz)** — without manually editing YAML files. `quiz_editor` can also be useful outside ob LabQuiz as a general quiz-editor with export capabilities.
+`quiz_editor` is a Streamlit-based application designed to help instructors build structured quiz databases for use with **[LabQuiz](https://github.com/jfbercher/labquiz)** — without manually editing YAML files. `quiz_editor` can also be useful outside of LabQuiz as a general quiz-editor with export capabilities.
 
 It supports question authoring, template variable simulation, encryption, tagging, and export to multiple formats.
 
