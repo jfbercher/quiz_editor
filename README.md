@@ -67,6 +67,15 @@ Or use the hosted version:
 `quiz_editor` -- editing a proposition -- correct or incorrect, hint (tip), answer (displayed during correction), bonus, penalty, etc.
 </div>  
 
+
+<div align="center">
+  <img src="https://github.com/jfbercher/labquiz/raw/main/docs/doc_images/quiz_editor_3.png" width="90%" height="auto" alt="quiz_editor">
+
+`quiz_editor` -- example of template usage with potentially external variables, including an editor preview based on automatically generated variables.
+</div> 
+
+
+
 <div align="center">
   <img src="https://github.com/jfbercher/labquiz/raw/main/docs/doc_images/exports1.png" width="90%" height="auto" alt="quiz_editor_exports">
 
